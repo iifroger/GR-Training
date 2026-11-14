@@ -200,10 +200,10 @@
         <!-- Seção API Key -->
         <div>
           <label for="gemini-api-input" class="block text-xs font-bold uppercase tracking-wider text-yellow-400 mb-1.5">
-            Chave da API do Gemini (Opcional no Preview)
+            Chave da API do Gemini (Para IA no GitHub Pages)
           </label>
           <p class="text-xs text-slate-400 mb-2 leading-relaxed">
-            Quando você hospedar este arquivo no <strong>GitHub Pages</strong>, cole abaixo sua chave gratuita do Google AI Studio para ativar a <strong>Migs</strong>, o aquecimento e as trocas inteligentes.
+            Como este arquivo está hospedado no <strong>GitHub Pages</strong>, cole abaixo sua chave gratuita do Google AI Studio para ativar a <strong>Migs</strong>, o aquecimento e as trocas inteligentes.
           </p>
           <div class="flex gap-2">
             <input 
@@ -238,14 +238,14 @@
     </div>
   </div>
 
-  <!-- Lógica da Aplicação + Integração Opcional com Firestore -->
+  <!-- Lógica da Aplicação + Integração com Firestore -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
     // --- CONFIGURAÇÃO DO GEMINI ---
-    const defaultApiKey = ""; // Injetado automaticamente no ambiente Canvas
+    const defaultApiKey = "";
     const GEMINI_TEXT_MODEL = "gemini-3-flash-preview";
 
     // --- FICHA DE TREINO V3 (FOCO EM CARGA, MENOS REPETIÇÕES E DEFINIÇÃO) ---
@@ -368,59 +368,61 @@
       appId: typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'
     };
 
-    // --- INICIALIZAÇÃO SEGURA DO FIREBASE (QUANDO DISPONÍVEL NO AMBIENTE) ---
+    // --- INICIALIZAÇÃO DO FIREBASE (CONFIGURAÇÃO FIXA PARA GITHUB PAGES) ---
     async function initCloudSync() {
       try {
-        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
-          const firebaseConfig = JSON.parse(__firebase_config);
-          const app = initializeApp(firebaseConfig);
-          const auth = getAuth(app);
-          const db = getFirestore(app);
-          state.db = db;
+        const firebaseConfig = {
+          apiKey: "AIzaSyB7rO_uY-VxifNCPRGucKcjbKmP00qLhhw",
+          authDomain: "treino-biel.firebaseapp.com",
+          projectId: "treino-biel",
+          storageBucket: "treino-biel.firebasestorage.app",
+          messagingSenderId: "555455890844",
+          appId: "1:555455890844:web:4a5af09ef4f55dede37459"
+        };
 
-          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-          } else {
-            await signInAnonymously(auth);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        state.db = db;
+
+        await signInAnonymously(auth);
+
+        onAuthStateChanged(auth, async (u) => {
+          if (!u) return;
+          state.user = u;
+          updateConnectionBadge(true);
+
+          // Carregar plano V3 do Firestore
+          try {
+            const planRef = doc(db, 'artifacts', state.appId, 'users', u.uid, 'profile', 'active_plan_v3');
+            const snap = await getDoc(planRef);
+            if (snap.exists()) {
+              state.workoutPlan = snap.data();
+              render();
+            } else {
+              await setDoc(planRef, state.workoutPlan);
+            }
+          } catch (err) {
+            console.warn("Aviso ao sincronizar plano:", err.message);
           }
 
-          onAuthStateChanged(auth, async (u) => {
-            if (!u) return;
-            state.user = u;
-            updateConnectionBadge(true);
-
-            // Carregar plano V3 do Firestore
-            try {
-              const planRef = doc(db, 'artifacts', state.appId, 'users', u.uid, 'profile', 'active_plan_v3');
-              const snap = await getDoc(planRef);
-              if (snap.exists()) {
-                state.workoutPlan = snap.data();
-                render();
-              } else {
-                await setDoc(planRef, state.workoutPlan);
-              }
-            } catch (err) {
-              console.warn("Aviso ao sincronizar plano:", err.message);
-            }
-
-            // Ouvir histórico (sem orderBy para respeitar regras de índice; ordenação feita em memória)
-            const histCol = collection(db, 'artifacts', state.appId, 'users', u.uid, 'workout_history');
-            onSnapshot(histCol, (snapshot) => {
-              const logs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-              logs.sort((a, b) => {
-                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
-                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
-                return dateB - dateA;
-              });
-              state.historyLogs = logs;
-              if (state.currentTab === 'History') render();
-            }, (error) => {
-              console.warn("Erro ao ouvir histórico:", error.message);
+          // Ouvir histórico (sem orderBy para respeitar regras de índice; ordenação feita em memória)
+          const histCol = collection(db, 'artifacts', state.appId, 'users', u.uid, 'workout_history');
+          onSnapshot(histCol, (snapshot) => {
+            const logs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            logs.sort((a, b) => {
+              const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+              const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+              return dateB - dateA;
             });
+            state.historyLogs = logs;
+            if (state.currentTab === 'History') render();
+          }, (error) => {
+            console.warn("Erro ao ouvir histórico:", error.message);
           });
-        }
+        });
       } catch (e) {
-        // Modo Standalone (GitHub Pages) sem Firebase configurado
+        console.warn("Falha na conexão com a nuvem:", e.message);
         updateConnectionBadge(false);
       }
     }
@@ -555,7 +557,7 @@
         return res.candidates?.[0]?.content?.parts?.[0]?.text || "Faz a variação na máquina livre mesmo, mulher!";
       } catch (e) {
         if (e.message === "API_KEY_MISSING") {
-          return "Amada, se estiver no GitHub Pages, clica na engrenagem ⚙️ lá em cima e cola sua chave gratuita do Gemini pra eu pensar!";
+          return "Amada, como você está no GitHub Pages, clica na engrenagem ⚙️ lá em cima e cola sua chave gratuita do Gemini pra eu pensar!";
         }
         return "Deu pane na rede da gata, tenta clicar de novo!";
       }
@@ -1171,7 +1173,7 @@
       const logsHtml = state.historyLogs.length === 0
         ? `<div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 text-center">
             <i data-lucide="calendar-days" class="w-10 h-10 text-slate-600 mx-auto mb-3"></i>
-            <p class="text-sm text-slate-400 font-medium">Nenhum treino finalizado ainda nesta sessão.</p>
+            <p class="text-sm text-slate-400 font-medium">Nenhum treino finalizado ainda.</p>
             <p class="text-xs text-slate-500 mt-1">Conclua seu treino A, B ou C para registrar aqui.</p>
           </div>`
         : state.historyLogs.map(log => {
