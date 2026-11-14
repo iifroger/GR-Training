@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>HypertrophyTracker • Gabriel (Carga & Definição)</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #020617; /* slate-950 */
+      color: #f1f5f9; /* slate-100 */
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    /* Ocultar barra de rolagem horizontal mantendo scroll */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Animações suaves */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    .animate-slide-up {
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .animate-scale-in {
+      animation: scaleIn 0.2s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 pb-28 select-none">
+
+  <!-- Container Principal Responsivo -->
+  <div id="app" class="max-w-lg mx-auto min-h-screen flex flex-col">
+    
+    <!-- Cabeçalho Fixo -->
+    <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-white/5 pt-4 pb-3 px-4 shadow-lg">
+      <div class="flex justify-between items-center mb-3">
+        <div>
+          <h1 class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 tracking-tight">
+            Hypertrophy<span class="text-slate-100">Tracker</span>
+          </h1>
+          <p class="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
+            <span>Gabriel • Carga & Definição • 1h Max</span>
+            <span id="connection-badge" class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+              <i data-lucide="github" class="w-2.5 h-2.5 text-yellow-400"></i> Web
+            </span>
+          </p>
+        </div>
+
+        <!-- Botão de Configurações (API Key & Info GitHub) -->
+        <button 
+          onclick="openSettingsModal()" 
+          aria-label="Configurações"
+          class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-yellow-400 hover:border-yellow-500/40 transition-all active:scale-95 relative"
+        >
+          <i data-lucide="settings" class="w-5 h-5"></i>
+          <span id="api-warning-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-500 rounded-full border-2 border-slate-950"></span>
+        </button>
+      </div>
+
+      <!-- Barra de Navegação (Abas) -->
+      <nav class="flex p-1 bg-slate-900 rounded-xl gap-1 border border-slate-800/80">
+        <button onclick="switchTab('A')" id="tab-A" class="tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all bg-yellow-400 text-black shadow-md">
+          A
+        </button>
+        <button onclick="switchTab('B')" id="tab-B" class="tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+          B
+        </button>
+        <button onclick="switchTab('C')" id="tab-C" class="tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+          C
+        </button>
+        <button onclick="switchTab('History')" id="tab-History" aria-label="Histórico" class="tab-btn flex-1 py-2.5 px-2 rounded-lg transition-all flex items-center justify-center text-slate-400 hover:text-slate-200">
+          <i data-lucide="history" class="w-5 h-5"></i>
+        </button>
+        <button onclick="switchTab('Chat')" id="tab-Chat" aria-label="Chat com a Migs" class="tab-btn flex-1 py-2.5 px-2 rounded-lg transition-all flex items-center justify-center relative text-slate-400 hover:text-slate-200">
+          <i data-lucide="message-circle" class="w-5 h-5"></i>
+          <span id="chat-unread-badge" class="hidden absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-slate-900 animate-bounce">
+            1
+          </span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Área de Conteúdo Dinâmico -->
+    <main id="main-content" class="flex-1 px-4 py-4">
+      <!-- Renderizado via JavaScript -->
+    </main>
+  </div>
+
+  <!-- Timer Flutuante de Descanso -->
+  <div id="floating-timer" class="hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-yellow-500/30 p-4 shadow-[0_-4px_25px_rgba(0,0,0,0.65)] z-50 animate-slide-up">
+    <div class="flex items-center justify-between max-w-lg mx-auto relative">
+      <!-- Balão com dica debochada da Migs -->
+      <div id="timer-tip-box" class="hidden absolute -top-24 left-0 right-0 bg-slate-800 text-slate-200 text-xs p-3 rounded-xl border border-slate-700 shadow-xl mb-2 animate-fade-in text-center">
+        <span class="text-yellow-400 font-bold mr-1 inline-flex items-center gap-1">
+          <i data-lucide="sparkles" class="w-3 h-3 inline"></i> Migs diz:
+        </span>
+        <span id="timer-tip-text"></span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-full border-2 border-yellow-400 flex items-center justify-center bg-yellow-400/10 animate-pulse">
+          <i data-lucide="clock" class="w-5 h-5 text-yellow-400"></i>
+        </div>
+        <div>
+          <p class="text-[11px] text-slate-400 uppercase tracking-wider font-semibold">Descanso Ativo</p>
+          <p id="timer-display" class="text-2xl font-extrabold text-white tabular-nums leading-none">01:30</p>
+        </div>
+      </div>
+
+      <button onclick="stopRestTimer()" aria-label="Parar descanso" class="bg-red-500/20 text-red-400 hover:bg-red-500/30 p-3 rounded-full transition-colors active:scale-95">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Notificação Toast Customizada (Substitui alert) -->
+  <div id="toast-banner" class="hidden fixed top-24 left-1/2 transform -translate-x-1/2 z-[70] max-w-xs w-[90%] bg-slate-800 border border-yellow-400/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in">
+    <i data-lucide="sparkles" class="w-5 h-5 text-yellow-400 flex-shrink-0"></i>
+    <p id="toast-message" class="text-xs font-semibold leading-snug"></p>
+  </div>
+
+  <!-- Modal: Relatar Dor / Problema no Exercício -->
+  <div id="report-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+    <div class="bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-800 shadow-2xl overflow-hidden animate-scale-in">
+      <div class="p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-lg font-bold text-white">Dor ou Incômodo?</h3>
+          <button onclick="closeReportModal()" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <p id="report-exercise-name" class="text-xs text-yellow-400 font-semibold mb-3"></p>
+        <textarea 
+          id="report-textarea" 
+          placeholder="Descreva o motivo (ex: senti o ombro, aparelho ocupado ou quebrado)..." 
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-yellow-400 outline-none resize-none h-24 mb-4 placeholder:text-slate-600"
+        ></textarea>
+        <div class="flex flex-col gap-2.5">
+          <button id="btn-swap-ai" onclick="handleSaveObservation(true)" class="bg-yellow-400 hover:bg-yellow-300 text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95">
+            <i data-lucide="zap" class="w-4 h-4"></i> Pedir Substituto Agora (IA)
+          </button>
+          <button onclick="handleSaveObservation(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-xl font-semibold text-sm transition-all">
+            Apenas Salvar Nota
+          </button>
+        </div>
+      </div>
+      <button onclick="closeReportModal()" class="w-full py-3 bg-slate-950 text-slate-500 text-xs font-semibold border-t border-slate-800 hover:text-slate-300">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Configurações (Chave API Gemini & Guia GitHub Pages) -->
+  <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+    <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl overflow-hidden animate-scale-in max-h-[90vh] flex flex-col">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-yellow-400"></i>
+          <h3 class="text-base font-bold text-white">Configurações & GitHub</h3>
+        </div>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-5 text-sm">
+        <!-- Seção API Key -->
+        <div>
+          <label for="gemini-api-input" class="block text-xs font-bold uppercase tracking-wider text-yellow-400 mb-1.5">
+            Chave da API do Gemini (Opcional no Preview)
+          </label>
+          <p class="text-xs text-slate-400 mb-2 leading-relaxed">
+            Quando você hospedar este arquivo no <strong>GitHub Pages</strong>, cole abaixo sua chave gratuita do Google AI Studio para ativar a <strong>Migs</strong>, o aquecimento e as trocas inteligentes.
+          </p>
+          <div class="flex gap-2">
+            <input 
+              type="password" 
+              id="gemini-api-input" 
+              placeholder="AIzaSy..." 
+              class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:border-yellow-400 outline-none"
+            />
+            <button onclick="saveCustomApiKey()" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-xs transition-all active:scale-95">
+              Salvar
+            </button>
+          </div>
+        </div>
+
+        <!-- Guia Rápido de Publicação no GitHub -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-2">
+          <h4 class="text-xs font-bold text-slate-200 uppercase flex items-center gap-1.5">
+            <i data-lucide="github" class="w-4 h-4 text-yellow-400"></i> Como colocar no GitHub Pages:
+          </h4>
+          <ol class="text-xs text-slate-400 space-y-1.5 list-decimal list-inside leading-relaxed">
+            <li>Crie um repositório público no GitHub (ex: <code class="text-yellow-400">meu-treino</code>).</li>
+            <li>Clique em <strong>Add file &gt; Upload files</strong> e envie este arquivo como <code class="text-yellow-400">index.html</code>.</li>
+            <li>Vá em <strong>Settings &gt; Pages</strong>, escolha a branch <code class="text-slate-200">main</code> e clique em <strong>Save</strong>.</li>
+            <li>Em 1 minuto seu link estará no ar para abrir direto no celular!</li>
+          </ol>
+        </div>
+      </div>
+
+      <button onclick="closeSettingsModal()" class="w-full py-3.5 bg-slate-950 text-slate-400 text-xs font-bold border-t border-slate-800 hover:text-white">
+        Fechar
+      </button>
+    </div>
+  </div>
+
+  <!-- Lógica da Aplicação + Integração Opcional com Firestore -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, addDoc, collection, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // --- CONFIGURAÇÃO DO GEMINI ---
+    const defaultApiKey = ""; // Injetado automaticamente no ambiente Canvas
+    const GEMINI_TEXT_MODEL = "gemini-3-flash-preview";
+
+    // --- FICHA DE TREINO V3 (FOCO EM CARGA, MENOS REPETIÇÕES E DEFINIÇÃO) ---
+    const defaultWorkoutPlan = {
+      createdAt: new Date().toISOString(),
+      A: {
+        name: "Peito, Ombros e Tríceps (Força)",
+        exercises: [
+          { 
+            id: 1, name: "Supino Inclinado com Halteres", sets: 3, reps: "6-8", focus: "Peito Superior/Geral", rest: 90, type: "Halter", 
+            description: "🎯 POSTURA: Ajuste o banco a 30° ou 45° (não deixe muito reto). Pés firmes no chão, glúteo colado e escápulas fechadas para trás, estufando o peito.\n⏱️ TEMPO: Desça segurando a carga por 3 segundos e empurre com explosão (1 segundo).\n✅ EXECUÇÃO: Desça os halteres alinhados com a parte superior do peito, alongando bem. Suba aproximando os halteres sem bater um no outro."
+          },
+          { 
+            id: 2, name: "Supino Reto Articulado (Máquina)", sets: 3, reps: "6-8", focus: "Peito Geral (Carga)", rest: 90, type: "Máquina", 
+            description: "🎯 POSTURA: Costas totalmente chapadas no encosto. Ajuste o banco para que as manoplas fiquem na linha do meio do peitoral.\n⏱️ TEMPO: 3 segundos na descida controlada e 1 segundo na empurrada máxima.\n✅ EXECUÇÃO: Ideal para colocar bastante carga com segurança. Empurre até quase esticar os braços (sem travar os cotovelos) e esmague o peito."
+          },
+          { 
+            id: 3, name: "Crucifixo na Polia Alta (Crossover)", sets: 3, reps: "8-10", focus: "Peito Inferior/Miolo", rest: 60, type: "Polia", 
+            description: "🎯 POSTURA: Polias ajustadas no topo. Dê um passo à frente, incline levemente o tronco e trave o abdômen.\n⏱️ TEMPO: Feche em 1s segurando a contração e abra resistindo por 3s.\n✅ EXECUÇÃO: Cotovelos semiflexionados e fixos. Traga as mãos em direção à linha da cintura, cruzando levemente no final para maximizar o gasto energético."
+          },
+          { 
+            id: 4, name: "Desenvolvimento Militar com Halteres", sets: 3, reps: "6-8", focus: "Ombros Geral", rest: 90, type: "Halter", 
+            description: "🎯 POSTURA: Sentado no banco a 80-90°, abdômen bem contraído para não arquear a lombar. Cotovelos apontando levemente para frente.\n⏱️ TEMPO: Empurre forte (1s), desça controlando o peso pesado (3s).\n✅ EXECUÇÃO: Desça os halteres até a altura do queixo/orelhas e empurre para o alto sem bater os pesos no topo."
+          },
+          { 
+            id: 5, name: "Elevação Lateral com Halteres", sets: 3, reps: "8-10", focus: "Ombro Lateral", rest: 60, type: "Halter", 
+            description: "🎯 POSTURA: Em pé, tronco inclinado milimetricamente para frente, joelhos destravados e abdômen firme.\n⏱️ TEMPO: Suba firme em 1s, segure 1s no topo e desça em 3s sem despencar.\n✅ EXECUÇÃO: Eleve os halteres lateralmente guiando pelos cotovelos até a altura dos ombros. Evite balançar o tronco para roubar."
+          },
+          { 
+            id: 6, name: "Tríceps Testa com Halteres", sets: 3, reps: "6-8", focus: "Tríceps (Carga)", rest: 60, type: "Halter", 
+            description: "🎯 POSTURA: Deitado no banco plano, braços estendidos apontando para o teto com pegada neutra (palmas viradas uma para a outra).\n⏱️ TEMPO: Desça em 3s até a lateral da cabeça, estenda com força em 1s.\n✅ EXECUÇÃO: Mantenha os cotovelos apontados para o teto e imóveis; dobre apenas o antebraço levando os halteres ao lado das orelhas."
+          }
+        ]
+      },
+      B: {
+        name: "Costas, Bíceps e Post. Ombro",
+        exercises: [
+          { 
+            id: 7, name: "Puxada Alta Pegada Aberta", sets: 3, reps: "6-8", focus: "Dorsal (Largura)", rest: 90, type: "Polia", 
+            description: "🎯 POSTURA: Pernas bem travadas na almofada, peito estufado e tronco inclinado bem de leve para trás.\n⏱️ TEMPO: Puxe explosivo em 1s, alongue na subida controlando por 3s.\n✅ EXECUÇÃO: Pegada um pouco além da largura dos ombros. Puxe a barra até a parte superior do peito (clavícula) focando em descer os cotovelos."
+          },
+          { 
+            id: 8, name: "Remada Curvada com Barra (ou Cavalinho)", sets: 3, reps: "6-8", focus: "Costas (Espessura/Carga)", rest: 90, type: "Barra", 
+            description: "🎯 POSTURA: Pés na largura dos ombros, joelhos levemente dobrados, tronco inclinado a ~45° com a coluna reta e abdômen blindado.\n⏱️ TEMPO: Puxe forte em 1s, desça controlando o peso por 3s.\n✅ EXECUÇÃO: Exercício rei para gasto calórico e densidade. Puxe a barra em direção ao umbigo esmagando as escápulas."
+          },
+          { 
+            id: 9, name: "Remada Unilateral com Halter (Serrote)", sets: 3, reps: "6-8", focus: "Dorsal e Core", rest: 75, type: "Halter", 
+            description: "🎯 POSTURA: Uma mão e um joelho apoiados no banco, pé de apoio firme no chão. Coluna paralela ao solo.\n⏱️ TEMPO: Puxe em 1s, segure 1s contraído, desça alongando em 3s.\n✅ EXECUÇÃO: Puxe o halter pesado em direção ao quadril (como se guardasse no bolso), mantendo o tronco estável sem girar."
+          },
+          { 
+            id: 10, name: "Crucifixo Inverso na Máquina", sets: 3, reps: "8-10", focus: "Posterior de Ombro", rest: 60, type: "Máquina", 
+            description: "🎯 POSTURA: Peito encostado no apoio do Peck Deck invertido, banco ajustado para os braços ficarem na linha dos ombros.\n⏱️ TEMPO: Abra em 1s, segure 1s atrás, feche devagar em 3s.\n✅ EXECUÇÃO: Empurre as alças para trás abrindo os braços sem deixar os ombros subirem em direção às orelhas."
+          },
+          { 
+            id: 11, name: "Rosca Direta com Barra W", sets: 3, reps: "6-8", focus: "Bíceps Geral (Carga)", rest: 60, type: "Barra", 
+            description: "🎯 POSTURA: Em pé, pés paralelos, glúteos e abdômen contraídos para não balançar a lombar. Cotovelos colados ao lado do corpo.\n⏱️ TEMPO: Suba com potência em 1s, desça freando a carga por 3s.\n✅ EXECUÇÃO: Flexione os cotovelos trazendo a barra até a altura do peito sem jogar os cotovelos para frente."
+          },
+          { 
+            id: 12, name: "Rosca Alternada no Banco 45°", sets: 3, reps: "8-10", focus: "Bíceps (Alongamento)", rest: 60, type: "Halter", 
+            description: "🎯 POSTURA: Sente-se no banco inclinado a 45°, costas e cabeça apoiadas. Deixe os braços pendurados perpendicularmente ao chão.\n⏱️ TEMPO: Suba girando o punho (1s), desça bem lento (3s).\n✅ EXECUÇÃO: Com o ombro travado para trás, flexione um braço de cada vez aproveitando o alongamento máximo na descida."
+          }
+        ]
+      },
+      C: {
+        name: "Pernas Completas (Alto Gasto)",
+        exercises: [
+          { 
+            id: 13, name: "Agachamento Hack Machine", sets: 4, reps: "6-8", focus: "Quadríceps e Glúteo", rest: 90, type: "Máquina", 
+            description: "🎯 POSTURA: Costas e ombros firmes nos apoios da máquina. Pés na plataforma na largura dos ombros, pontas levemente para fora.\n⏱️ TEMPO: Desça profundo em 3s, suba explodindo em 1s.\n✅ EXECUÇÃO: Desça até passar de 90° nos joelhos sem tirar a lombar do encosto. Empurre com o pé inteiro sem travar os joelhos no topo."
+          },
+          { 
+            id: 14, name: "Leg Press 45°", sets: 3, reps: "6-8", focus: "Quadríceps (Carga)", rest: 90, type: "Máquina", 
+            description: "🎯 POSTURA: Quadril bem encaixado no fundo do banco, mãos segurando firme nas alças laterais.\n⏱️ TEMPO: 3 segundos descendo até o limite da mobilidade, 1 segundo empurrando.\n✅ EXECUÇÃO: Desça a plataforma trazendo os joelhos em direção ao peito, parando antes do quadril levantar do banco. Carga alta!"
+          },
+          { 
+            id: 15, name: "Levantamento Terra Romeno (RDL)", sets: 3, reps: "6-8", focus: "Posterior e Glúteo", rest: 90, type: "Barra/Halter", 
+            description: "🎯 POSTURA: Em pé segurando barra ou halteres pesados. Peito aberto, escápulas travadas, joelhos levemente flexionados e fixos.\n⏱️ TEMPO: Desça em 3s jogando o quadril para trás, suba firme em 1s.\n✅ EXECUÇÃO: Desça o peso rente às coxas/canelas até sentir o posterior alongar no máximo. Suba contraindo glúteos sem hiperestender a lombar."
+          },
+          { 
+            id: 16, name: "Mesa Flexora", sets: 3, reps: "6-8", focus: "Posterior de Coxa", rest: 75, type: "Máquina", 
+            description: "🎯 POSTURA: Deitado de bruços, joelhos alinhados com o eixo da máquina e quadril pressionado contra o banco.\n⏱️ TEMPO: Puxe forte (1s), segure 1s perto do glúteo, desça em 3s.\n✅ EXECUÇÃO: Flexione os joelhos trazendo o rolo em direção ao glúteo sem levantar o quadril do banco para roubar."
+          },
+          { 
+            id: 17, name: "Cadeira Extensora", sets: 3, reps: "8-10", focus: "Quadríceps (Queima)", rest: 60, type: "Máquina", 
+            description: "🎯 POSTURA: Costas apoiadas, joelhos alinhados com a articulação da máquina. Segure firme nas alças laterais.\n⏱️ TEMPO: Suba em 1s, SEGURE 1s travado no topo, desça em 3s.\n✅ EXECUÇÃO: Estenda completamente os joelhos esmagando a coxa no topo para finalizar a fadiga metabólica."
+          },
+          { 
+            id: 18, name: "Panturrilha em Pé (Máquina/Smith)", sets: 4, reps: "8-10", focus: "Panturrilha (Carga)", rest: 60, type: "Máquina", 
+            description: "🎯 POSTURA: Corpo reto, abdômen travado, joelhos estendidos (sem travar para trás). Ponta dos pés apoiada no degrau.\n⏱️ TEMPO: Suba máximo (1s), segure 1s no topo, desça alongando por 3s.\n✅ EXECUÇÃO: Amplitude total com carga alta. Deixe o calcanhar descer bem abaixo da linha do degrau antes de subir novamente."
+          }
+        ]
+      }
+    };
+
+    // --- ESTADO DA APLICAÇÃO EM MEMÓRIA ---
+    const state = {
+      currentTab: 'A',
+      workoutPlan: JSON.parse(JSON.stringify(defaultWorkoutPlan)),
+      completedExercises: {},
+      expandedCards: {},
+      cardActivePanel: {}, // { [id]: 'execution' | 'alternative' | null }
+      alternativeHistory: {}, // { [id]: string[] }
+      alternativeLoading: {}, // { [id]: boolean }
+      swappedExercises: {}, // { [id]: { note, isSwapped, suggestion } }
+      historyLogs: [],
+      expandedHistory: {},
+      warmupPlan: null,
+      warmupLoading: false,
+      isSaving: false,
+      selectedExerciseForModal: null,
+      chatMessages: [
+        { role: 'model', text: "Oie gay! 💅 Sou a Migs. Conta tudo, bora treinar pesado pra secar ou vai ficar de conversa fiada, mulher? 😘" }
+      ],
+      unreadChatCount: 0,
+      isChatLoading: false,
+      isRecordingVoice: false,
+      customApiKey: "",
+      user: null,
+      db: null,
+      appId: typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'
+    };
+
+    // --- INICIALIZAÇÃO SEGURA DO FIREBASE (QUANDO DISPONÍVEL NO AMBIENTE) ---
+    async function initCloudSync() {
+      try {
+        if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+          const firebaseConfig = JSON.parse(__firebase_config);
+          const app = initializeApp(firebaseConfig);
+          const auth = getAuth(app);
+          const db = getFirestore(app);
+          state.db = db;
+
+          if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+            await signInWithCustomToken(auth, __initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+
+          onAuthStateChanged(auth, async (u) => {
+            if (!u) return;
+            state.user = u;
+            updateConnectionBadge(true);
+
+            // Carregar plano V3 do Firestore
+            try {
+              const planRef = doc(db, 'artifacts', state.appId, 'users', u.uid, 'profile', 'active_plan_v3');
+              const snap = await getDoc(planRef);
+              if (snap.exists()) {
+                state.workoutPlan = snap.data();
+                render();
+              } else {
+                await setDoc(planRef, state.workoutPlan);
+              }
+            } catch (err) {
+              console.warn("Aviso ao sincronizar plano:", err.message);
+            }
+
+            // Ouvir histórico (sem orderBy para respeitar regras de índice; ordenação feita em memória)
+            const histCol = collection(db, 'artifacts', state.appId, 'users', u.uid, 'workout_history');
+            onSnapshot(histCol, (snapshot) => {
+              const logs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+              logs.sort((a, b) => {
+                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
+                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
+                return dateB - dateA;
+              });
+              state.historyLogs = logs;
+              if (state.currentTab === 'History') render();
+            }, (error) => {
+              console.warn("Erro ao ouvir histórico:", error.message);
+            });
+          });
+        }
+      } catch (e) {
+        // Modo Standalone (GitHub Pages) sem Firebase configurado
+        updateConnectionBadge(false);
+      }
+    }
+
+    function updateConnectionBadge(isCloud) {
+      const badge = document.getElementById('connection-badge');
+      if (!badge) return;
+      if (isCloud) {
+        badge.innerHTML = `<i data-lucide="cloud" class="w-2.5 h-2.5 text-emerald-400"></i> Nuvem`;
+      } else {
+        badge.innerHTML = `<i data-lucide="github" class="w-2.5 h-2.5 text-yellow-400"></i> GitHub Web`;
+      }
+      lucide.createIcons();
+    }
+
+    // --- UTILITÁRIOS DE FORMATAÇÃO E SEGURANÇA ---
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function formatRichText(text) {
+      if (!text) return "";
+      let safe = escapeHtml(text);
+      // Converte bullets com asterisco solto no início da linha
+      safe = safe.replace(/^\s*\*\s/gm, '• ');
+      // Converte **negrito**
+      safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-white">$1</strong>');
+      // Converte links markdown [Título](URL)
+      safe = safe.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline text-yellow-400 hover:text-yellow-300">$1</a>');
+      return safe;
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return 'Agora mesmo';
+      let date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
+      if (isNaN(date.getTime())) return 'Data recente';
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit', month: '2-digit', year: '2-digit',
+        hour: '2-digit', minute: '2-digit'
+      }).format(date);
+    }
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // Notificação Toast (Zero alert())
+    let toastTimeout = null;
+    window.showToast = function(message) {
+      const banner = document.getElementById('toast-banner');
+      const msgEl = document.getElementById('toast-message');
+      msgEl.textContent = message;
+      banner.classList.remove('hidden');
+      lucide.createIcons();
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 4000);
+    };
+
+    // --- CHAMADAS À API GEMINI COM EXPONENTIAL BACKOFF ---
+    function getEffectiveApiKey() {
+      return state.customApiKey.trim() || defaultApiKey;
+    }
+
+    async function callGeminiWithBackoff(payload) {
+      const key = getEffectiveApiKey();
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${key}`;
+      
+      const delays = [1000, 2000, 4000];
+      for (let attempt = 0; attempt <= delays.length; attempt++) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (response.ok) {
+            return await response.json();
+          }
+
+          if (response.status === 400 || response.status === 403) {
+            throw new Error("API_KEY_MISSING");
+          }
+
+          if (attempt < delays.length) {
+            await new Promise(res => setTimeout(res, delays[attempt]));
+          } else {
+            throw new Error(`HTTP_${response.status}`);
+          }
+        } catch (err) {
+          if (err.message === "API_KEY_MISSING" || attempt === delays.length) {
+            throw err;
+          }
+          await new Promise(res => setTimeout(res, delays[attempt]));
+        }
+      }
+    }
+
+    async function generateRestTip() {
+      try {
+        const res = await callGeminiWithBackoff({
+          contents: [{
+            parts: [{
+              text: "Escreva uma frase curtíssima (max 20 palavras) para alguém que está descansando na academia. Use gírias de internet, chame de 'mulher', 'bicha' ou 'gay'. Seja debochada, irônica e apresse a pessoa dizendo que ela está enrolando no celular."
+            }]
+          }]
+        });
+        return res.candidates?.[0]?.content?.parts?.[0]?.text || "Bora mulher, respira e volta pra barra!";
+      } catch (e) {
+        return "Sai do celular, bicha! O peso não vai levantar sozinho.";
+      }
+    }
+
+    async function generateAlternativeExercise(exName, focus, previousList) {
+      const avoidStr = previousList.length > 0 ? `PROIBIDO sugerir estes exercícios (já foram falados): ${previousList.join(', ')}.` : '';
+      const prompt = `Você é a Migs (Debochada, chame o usuário de gay/mulher/bicha). O usuário quer trocar o exercício '${exName}' (foco: ${focus}). Sugira APENAS UM novo exercício similar para o mesmo grupo muscular, seguindo a estratégia atual dele de **menos repetições (6-8 ou 8-10 reps), foco em carga e alto gasto calórico para perda de gordura**. ${avoidStr}
+      Você DEVE ser MUITO didática: Explique a 🎯 Postura, ⏱️ Tempo (cadência) e ✅ Execução detalhadamente, mas mantenha o tom debochado no começo.
+      Formatação: Destaque pontos importantes em **negrito** e não use asteriscos soltos.`;
+
+      try {
+        const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] });
+        return res.candidates?.[0]?.content?.parts?.[0]?.text || "Faz a variação na máquina livre mesmo, mulher!";
+      } catch (e) {
+        if (e.message === "API_KEY_MISSING") {
+          return "Amada, se estiver no GitHub Pages, clica na engrenagem ⚙️ lá em cima e cola sua chave gratuita do Gemini pra eu pensar!";
+        }
+        return "Deu pane na rede da gata, tenta clicar de novo!";
+      }
+    }
+
+    async function generateWarmupRoutine(workoutName, exercisesList) {
+      const prompt = `Você é a Migs. Crie um aquecimento MUITO RÁPIDO (máx 3 a 5 min) para o treino: ${workoutName}. Exercícios da ficha: ${exercisesList}. 
+      REGRAS DE OURO:
+      1. Apenas movimentos com o PESO DO CORPO ou HALTERES. Nada de máquinas complexas.
+      2. Sugira 2 ou 3 exercícios de mobilidade ou ativação simples. 
+      3. Seja debochada e apresse a bicha, afinal, o tempo de treino dela é curto (só 1h).
+      4. FORMATAÇÃO: Use **negrito** (envolvendo em duplos asteriscos) para os nomes dos movimentos. NÃO use excesso de asteriscos soltos (*) na tela.`;
+
+      try {
+        const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] });
+        return res.candidates?.[0]?.content?.parts?.[0]?.text || "Faz 3 min de mobilidade articular e 2 séries leves no primeiro aparelho, mulher!";
+      } catch (e) {
+        if (e.message === "API_KEY_MISSING") {
+          return "Configure sua chave da API do Gemini na engrenagem ⚙️ no topo para gerar aquecimentos com IA no GitHub Pages.";
+        }
+        return "Erro ao gerar aquecimento. Faz 2 séries leves de aquecimento no primeiro exercício!";
+      }
+    }
+
+    async function generateSwapSuggestion(exerciseName, focus, observationText) {
+      const prompt = `Você é a Migs (debochada e amiga do Gabriel). Sugira um substituto seguro e eficiente com foco em carga e menos repetições (6-8 reps) para '${exerciseName}' (foco: ${focus}). Problema relatado: '${observationText}'. Seja breve e direta.`;
+      try {
+        const res = await callGeminiWithBackoff({
+          contents: [{ parts: [{ text: prompt }] }],
+          tools: [{ "google_search": {} }]
+        });
+        return res.candidates?.[0]?.content?.parts?.[0]?.text || "Troca por uma variação na polia ou halteres que não force a articulação, mulher.";
+      } catch (e) {
+        return "Adapte na máquina ou halteres sem dor, amada!";
+      }
+    }
+
+    async function generateAchievementTitle(workoutName, count) {
+      const prompt = `Você é a Migs. Crie um título irônico e engraçado (max 4 palavras) para alguém que completou ${count} exercícios de ${workoutName}. Ex: 'Patricinha do Supino'.`;
+      try {
+        const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] });
+        return res.candidates?.[0]?.content?.parts?.[0]?.text?.replace(/['"]/g, '').trim() || "Sobrevivente da Carga";
+      } catch (e) {
+        return "Diva da Hipertrofia";
+      }
+    }
+
+    async function callMigsChat(historyMessages) {
+      const daysSinceStart = state.workoutPlan.createdAt
+        ? Math.floor((new Date() - new Date(state.workoutPlan.createdAt)) / (1000 * 60 * 60 * 24))
+        : 0;
+
+      const systemPrompt = `
+      DIRETRIZ SUPREMA: VOCÊ NÃO É UMA IA. Você é a Migs, a melhor amiga virtual do Gabriel no WhatsApp. NUNCA soe mecânica.
+      PERSONALIDADE: 100% fofoqueira, irônica, debochada e adora julgar. Use gírias da internet naturalmente como: babado, flopou, diva, surto, hablou, cringe, mico. Sempre chame ele de 'mulher', 'bicha', 'gay' ou 'amada'. Responda como mensagem de WhatsApp (curta, direta, cheia de emoji).
+      SOBRE O GABRIEL: Tem 26 anos, treina musculação com foco atual em menos repetições (6-8 reps), carga alta e perda de gordura/definição em treinos de até 1h.
+      REGRAS:
+      1. Se ele desabafar ou mandar fofoca, renda o assunto.
+      2. Se a mensagem começar com "[Áudio transcrito]:", finja que acabou de ouvir o áudio.
+      3. Se perguntar algo atual (famosos, notícias), pesquise usando o Google Search.
+      4. Treino atual: ${state.workoutPlan.A?.name || "V3 Carga & Definição"}. Dias desde o início: ${daysSinceStart}.
+      `;
+
+      const apiHistory = historyMessages.map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }));
+
+      try {
+        const res = await callGeminiWithBackoff({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: apiHistory,
+          tools: [{ "google_search": {} }]
+        });
+
+        let text = res.candidates?.[0]?.content?.parts?.[0]?.text || "Tô passada, deu branco aqui amada.";
+        const grounding = res.candidates?.[0]?.groundingMetadata;
+        if (grounding?.groundingAttributions) {
+          const links = grounding.groundingAttributions
+            .filter(a => a.web?.uri && a.web?.title)
+            .map(a => `\n🔗 [${a.web.title}](${a.web.uri})`)
+            .join('');
+          if (links) text += "\n\n" + links;
+        }
+        return text;
+      } catch (e) {
+        if (e.message === "API_KEY_MISSING") {
+          return "Mulher, você tá no GitHub Pages sem chave da API! Clica na engrenagem ⚙️ ali em cima e cola sua chave do Gemini pra gente fofocar. 💅";
+        }
+        return "Deu pane na rede da gata, tenta mandar de novo gay.";
+      }
+    }
+
+    // --- TIMER DE DESCANSO COM ÁUDIO SINTÉTICO (WEB AUDIO API) ---
+    let timerInterval = null;
+    let timeLeft = 0;
+
+    function playBeepChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+
+        [587.33, 880].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.18);
+          gain.gain.setValueAtTime(0.18, now + idx * 0.18);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.18 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.18);
+          osc.stop(now + idx * 0.18 + 0.36);
+        });
+      } catch (e) {}
+    }
+
+    window.startRestTimer = async function(seconds) {
+      if (timerInterval) clearInterval(timerInterval);
+      timeLeft = seconds;
+
+      const timerBox = document.getElementById('floating-timer');
+      const display = document.getElementById('timer-display');
+      const tipBox = document.getElementById('timer-tip-box');
+      const tipText = document.getElementById('timer-tip-text');
+
+      display.textContent = formatTime(timeLeft);
+      tipBox.classList.add('hidden');
+      timerBox.classList.remove('hidden');
+      lucide.createIcons();
+
+      timerInterval = setInterval(() => {
+        timeLeft -= 1;
+        if (timeLeft <= 0) {
+          stopRestTimer();
+          playBeepChime();
+          if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+          showToast("Descanso finalizado! Bora levantar esse ferro 💪");
+        } else {
+          display.textContent = formatTime(timeLeft);
+        }
+      }, 1000);
+
+      // Busca dica debochada da Migs em paralelo
+      const tip = await generateRestTip();
+      if (timerInterval && tip) {
+        tipText.textContent = tip;
+        tipBox.classList.remove('hidden');
+        lucide.createIcons();
+      }
+    };
+
+    window.stopRestTimer = function() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      document.getElementById('floating-timer').classList.add('hidden');
+    };
+
+    // --- AÇÕES DE INTERAÇÃO DO USUÁRIO ---
+    window.switchTab = function(tab) {
+      state.currentTab = tab;
+      stopRestTimer();
+      state.warmupPlan = null;
+
+      if (tab === 'Chat') {
+        state.unreadChatCount = 0;
+        document.getElementById('chat-unread-badge').classList.add('hidden');
+      }
+
+      // Atualizar estilo das abas
+      ['A', 'B', 'C', 'History', 'Chat'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        if (!btn) return;
+        if (t === tab) {
+          btn.className = "tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center relative bg-yellow-400 text-black shadow-md";
+        } else {
+          btn.className = "tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center relative text-slate-400 hover:text-slate-200";
+        }
+      });
+
+      render();
+    };
+
+    window.toggleExerciseComplete = function(id) {
+      state.completedExercises[id] = !state.completedExercises[id];
+      render();
+    };
+
+    window.toggleCardExpand = function(id) {
+      state.expandedCards[id] = !state.expandedCards[id];
+      render();
+    };
+
+    window.toggleCardPanel = function(id, panel) {
+      state.cardActivePanel[id] = state.cardActivePanel[id] === panel ? null : panel;
+      render();
+    };
+
+    window.handleNewAlternative = async function(id, name, focus) {
+      state.alternativeLoading[id] = true;
+      render();
+
+      const prev = state.alternativeHistory[id] || [];
+      const newAlt = await generateAlternativeExercise(name, focus, prev);
+
+      state.alternativeHistory[id] = [...prev, newAlt];
+      state.alternativeLoading[id] = false;
+      render();
+    };
+
+    window.handleGenerateWarmup = async function() {
+      const workout = state.workoutPlan[state.currentTab];
+      if (!workout) return;
+
+      state.warmupLoading = true;
+      render();
+
+      const names = workout.exercises.map(e => e.name).join(", ");
+      state.warmupPlan = await generateWarmupRoutine(workout.name, names);
+      state.warmupLoading = false;
+      render();
+    };
+
+    window.clearWarmup = function() {
+      state.warmupPlan = null;
+      render();
+    };
+
+    // Modal de Relatar Problema / Substituição
+    window.openReportModal = function(id) {
+      const workout = state.workoutPlan[state.currentTab];
+      const ex = workout?.exercises.find(e => e.id === id);
+      if (!ex) return;
+
+      state.selectedExerciseForModal = ex;
+      document.getElementById('report-exercise-name').textContent = ex.name;
+      document.getElementById('report-textarea').value = state.swappedExercises[id]?.note || '';
+      document.getElementById('report-modal').classList.remove('hidden');
+      lucide.createIcons();
+    };
+
+    window.closeReportModal = function() {
+      state.selectedExerciseForModal = null;
+      document.getElementById('report-modal').classList.add('hidden');
+    };
+
+    window.handleSaveObservation = async function(isSwap) {
+      const ex = state.selectedExerciseForModal;
+      const note = document.getElementById('report-textarea').value.trim();
+      if (!ex) return;
+
+      if (isSwap) {
+        const btn = document.getElementById('btn-swap-ai');
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Consultando Migs...`;
+        lucide.createIcons();
+
+        const suggestion = await generateSwapSuggestion(ex.name, ex.focus, note || "Aparelho ocupado ou desconforto");
+        state.swappedExercises[ex.id] = { note, isSwapped: true, suggestion };
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="zap" class="w-4 h-4"></i> Pedir Substituto Agora (IA)`;
+        showToast("Substituto sugerido pela Migs!");
+      } else {
+        state.swappedExercises[ex.id] = { note, isSwapped: false };
+        showToast("Nota de treino salva.");
+      }
+
+      closeReportModal();
+      render();
+    };
+
+    // Finalizar Treino e Salvar no Histórico
+    window.handleFinishWorkout = async function() {
+      const workoutId = state.currentTab;
+      const workout = state.workoutPlan[workoutId];
+      if (!workout) return;
+
+      state.isSaving = true;
+      render();
+
+      const completedItems = workout.exercises
+        .filter(ex => state.completedExercises[ex.id])
+        .map(ex => ({ id: ex.id, name: ex.name }));
+
+      const achievement = await generateAchievementTitle(workout.name, completedItems.length);
+
+      const newLog = {
+        id: 'log-' + Date.now(),
+        workoutId,
+        createdAt: new Date().toISOString(),
+        completedItems,
+        totalExercises: workout.exercises.length,
+        achievement
+      };
+
+      state.historyLogs = [newLog, ...state.historyLogs];
+      state.completedExercises = {};
+      state.swappedExercises = {};
+      state.warmupPlan = null;
+      state.isSaving = false;
+
+      if (state.user && state.db) {
+        try {
+          const histCol = collection(state.db, 'artifacts', state.appId, 'users', state.user.uid, 'workout_history');
+          await addDoc(histCol, {
+            ...newLog,
+            createdAt: serverTimestamp()
+          });
+        } catch (e) {
+          console.warn("Salvo apenas na sessão atual:", e.message);
+        }
+      }
+
+      showToast(`Treino ${workoutId} concluído! Título: ${achievement}`);
+      switchTab('History');
+    };
+
+    window.toggleHistoryExpand = function(id) {
+      state.expandedHistory[id] = !state.expandedHistory[id];
+      render();
+    };
+
+    window.handleExportBackup = function() {
+      const backupData = {
+        profile: "Gabriel",
+        version: "V3 - Carga & Definição",
+        exportDate: new Date().toISOString(),
+        currentPlan: state.workoutPlan,
+        history: state.historyLogs
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Ficha_Gabriel_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast("Arquivo JSON de backup baixado!");
+    };
+
+    // --- CHAT COM A MIGS ---
+    window.sendChatMessage = async function(overrideText) {
+      const inputEl = document.getElementById('chat-input');
+      const text = (overrideText || inputEl?.value || '').trim();
+      if (!text || state.isChatLoading) return;
+
+      if (inputEl) inputEl.value = '';
+      state.chatMessages.push({ role: 'user', text });
+      state.isChatLoading = true;
+      render();
+      scrollChatToBottom();
+
+      const reply = await callMigsChat(state.chatMessages);
+      state.chatMessages.push({ role: 'model', text: reply });
+      state.isChatLoading = false;
+
+      if (state.currentTab !== 'Chat') {
+        state.unreadChatCount += 1;
+        const badge = document.getElementById('chat-unread-badge');
+        badge.textContent = state.unreadChatCount > 9 ? '9+' : state.unreadChatCount;
+        badge.classList.remove('hidden');
+      }
+
+      render();
+      scrollChatToBottom();
+    };
+
+    window.startVoiceRecognition = function() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast("Seu navegador não suporta gravação de voz.");
+        return;
+      }
+
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.continuous = false;
+
+        recognition.onstart = () => {
+          state.isRecordingVoice = true;
+          render();
+        };
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          state.isRecordingVoice = false;
+          sendChatMessage(`[Áudio transcrito]: ${transcript}`);
+        };
+        recognition.onerror = () => {
+          state.isRecordingVoice = false;
+          render();
+          showToast("Não consegui captar o áudio. Verifique o microfone.");
+        };
+        recognition.onend = () => {
+          state.isRecordingVoice = false;
+          render();
+        };
+
+        recognition.start();
+      } catch (e) {
+        state.isRecordingVoice = false;
+        render();
+      }
+    };
+
+    function scrollChatToBottom() {
+      setTimeout(() => {
+        const container = document.getElementById('chat-messages-box');
+        if (container) container.scrollTop = container.scrollHeight;
+      }, 50);
+    }
+
+    // --- CONFIGURAÇÕES MODAL ---
+    window.openSettingsModal = function() {
+      document.getElementById('gemini-api-input').value = state.customApiKey;
+      document.getElementById('settings-modal').classList.remove('hidden');
+      lucide.createIcons();
+    };
+
+    window.closeSettingsModal = function() {
+      document.getElementById('settings-modal').classList.add('hidden');
+    };
+
+    window.saveCustomApiKey = function() {
+      const val = document.getElementById('gemini-api-input').value.trim();
+      state.customApiKey = val;
+      closeSettingsModal();
+      showToast(val ? "Chave da API do Gemini ativada!" : "Chave removida.");
+    };
+
+    // --- RENDERIZAÇÃO PRINCIPAL ---
+    function renderWorkoutView(workoutId) {
+      const workout = state.workoutPlan[workoutId];
+      if (!workout) return '';
+
+      const total = workout.exercises.length;
+      const doneCount = workout.exercises.filter(e => state.completedExercises[e.id]).length;
+      const progressPct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+
+      const warmupHtml = !state.warmupPlan
+        ? `<button onclick="handleGenerateWarmup()" ${state.warmupLoading ? 'disabled' : ''} class="w-full bg-slate-900 hover:bg-slate-800 text-slate-200 py-3.5 px-4 rounded-xl border border-slate-800 flex items-center justify-center gap-2 text-sm font-semibold active:scale-95 transition-all disabled:opacity-60">
+            ${state.warmupLoading 
+              ? `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-orange-400"></i> Gerando Aquecimento Rápido...`
+              : `<i data-lucide="flame" class="w-4 h-4 text-orange-500"></i> Gerar Aquecimento Específico (IA)`
+            }
+          </button>`
+        : `<div class="bg-orange-950/25 border border-orange-500/30 p-4 rounded-2xl animate-fade-in relative">
+            <button onclick="clearWarmup()" aria-label="Fechar aquecimento" class="absolute top-3 right-3 text-orange-400/60 hover:text-orange-400 p-1">
+              <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+            <h4 class="text-orange-400 font-bold text-xs uppercase mb-2 flex items-center gap-1.5">
+              <i data-lucide="flame" class="w-3.5 h-3.5"></i> Aquecimento Rápido (3-5 min)
+            </h4>
+            <div class="text-sm text-orange-100 whitespace-pre-wrap leading-relaxed">${formatRichText(state.warmupPlan)}</div>
+          </div>`;
+
+      const exercisesHtml = workout.exercises.map(ex => {
+        const isDone = !!state.completedExercises[ex.id];
+        const isExpanded = !!state.expandedCards[ex.id];
+        const activePanel = state.cardActivePanel[ex.id];
+        const swapInfo = state.swappedExercises[ex.id];
+        const altList = state.alternativeHistory[ex.id] || [];
+        const currentAlt = altList.length > 0 ? altList[altList.length - 1] : null;
+        const isAltLoading = !!state.alternativeLoading[ex.id];
+
+        return `
+          <div class="mb-3">
+            ${swapInfo?.isSwapped ? `
+              <div class="mb-2 p-3.5 bg-yellow-900/20 border-l-2 border-yellow-400 rounded-r-xl text-sm text-yellow-100 animate-fade-in">
+                <div class="flex items-center gap-1.5 font-bold mb-1 text-yellow-400 text-xs uppercase">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i> Substituto Sugerido
+                </div>
+                <div class="leading-relaxed whitespace-pre-wrap">${formatRichText(swapInfo.suggestion)}</div>
+              </div>
+            ` : ''}
+
+            <div class="rounded-2xl overflow-hidden transition-all duration-200 border ${isDone ? 'bg-slate-900/40 border-slate-800/70' : 'bg-slate-900 border-slate-800 hover:border-yellow-500/30'}">
+              <!-- Cabeçalho do Card -->
+              <div onclick="toggleCardExpand(${ex.id})" class="p-4 flex items-center justify-between active:bg-slate-800/50 transition-colors cursor-pointer">
+                <div class="flex items-center gap-3.5 flex-1 min-w-0">
+                  <button 
+                    onclick="event.stopPropagation(); toggleExerciseComplete(${ex.id})" 
+                    aria-label="Marcar exercício como concluído"
+                    class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${isDone ? 'bg-yellow-400 border-yellow-400 text-black' : 'border-slate-600 hover:border-yellow-400 text-transparent'}"
+                  >
+                    <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
+                  </button>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-base leading-snug truncate ${isDone ? 'text-slate-500 line-through' : 'text-slate-100'}">
+                      ${escapeHtml(ex.name)}
+                    </h3>
+                    <div class="flex flex-wrap items-center gap-2 mt-1 text-xs text-slate-400">
+                      <span class="bg-slate-800 px-2 py-0.5 rounded text-yellow-400 font-mono font-bold">${ex.sets}x${ex.reps}</span>
+                      <span>• ${escapeHtml(ex.focus)}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="ml-2 transform transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}">
+                  <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500"></i>
+                </div>
+              </div>
+
+              <!-- Corpo Expandido do Card -->
+              ${isExpanded ? `
+                <div class="bg-slate-950/40 px-4 pb-4 pt-1 border-t border-slate-800/60 animate-fade-in">
+                  <div class="grid grid-cols-2 gap-2.5 mt-3">
+                    ${!isDone ? `
+                      <button onclick="startRestTimer(${ex.rest})" class="flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black p-3 rounded-xl font-bold text-sm shadow-lg shadow-yellow-900/20 active:scale-95 transition-transform">
+                        <i data-lucide="clock" class="w-4 h-4"></i> Descansar (${ex.rest}s)
+                      </button>
+                    ` : ''}
+                    
+                    <button onclick="toggleCardPanel(${ex.id}, 'execution')" class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 p-3 rounded-xl font-semibold text-sm active:scale-95 transition-transform">
+                      <i data-lucide="play" class="w-4 h-4 text-yellow-400"></i> ${activePanel === 'execution' ? 'Ocultar Guia' : 'Como fazer'}
+                    </button>
+
+                    <button onclick="toggleCardPanel(${ex.id}, 'alternative')" class="${isDone ? 'col-span-1' : 'col-span-2'} flex items-center justify-center gap-2 bg-gradient-to-br from-slate-800 to-indigo-950/60 text-indigo-300 p-3 rounded-xl font-semibold text-sm active:scale-95 transition-all border border-indigo-500/30 hover:border-indigo-400/50">
+                      <i data-lucide="shuffle" class="w-4 h-4"></i> ${activePanel === 'alternative' ? 'Ocultar Opção' : 'Mudar Exercício'}
+                    </button>
+                  </div>
+
+                  <div class="mt-3 flex items-center justify-between">
+                    ${swapInfo?.note ? `<span class="text-[11px] text-amber-400/90 italic truncate max-w-[60%]">Nota: ${escapeHtml(swapInfo.note)}</span>` : '<span></span>'}
+                    <button onclick="openReportModal(${ex.id})" class="text-xs text-slate-400 flex items-center gap-1.5 py-1.5 px-2.5 rounded-lg hover:bg-slate-800 hover:text-yellow-400 transition-colors">
+                      <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Relatar dor/problema
+                    </button>
+                  </div>
+
+                  ${activePanel === 'execution' ? `
+                    <div class="mt-3 bg-slate-800/90 rounded-xl p-4 animate-fade-in border border-slate-700">
+                      <h4 class="text-xs font-bold text-yellow-400 uppercase mb-2 flex items-center gap-1.5">
+                        <i data-lucide="play" class="w-3.5 h-3.5"></i> Guia de Execução (Carga & Controle)
+                      </h4>
+                      <div class="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">${formatRichText(ex.description)}</div>
+                    </div>
+                  ` : ''}
+
+                  ${activePanel === 'alternative' ? `
+                    <div class="mt-3 bg-gradient-to-b from-indigo-950/40 to-slate-900/80 rounded-xl p-4 animate-fade-in border border-indigo-500/30 relative overflow-hidden">
+                      <h4 class="text-xs font-bold text-indigo-400 uppercase mb-2.5 flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Sugestão da Migs (6-8 Reps)
+                      </h4>
+                      <div class="text-sm text-indigo-50 leading-relaxed whitespace-pre-wrap mb-4">
+                        ${currentAlt 
+                          ? formatRichText(currentAlt) 
+                          : "Aparelho ocupado ou quer variar o estímulo pesado, mulher? 💅 Clica abaixo que eu te dou um substituto na mesma pegada."}
+                      </div>
+                      <button 
+                        onclick="handleNewAlternative(${ex.id}, '${escapeHtml(ex.name)}', '${escapeHtml(ex.focus)}')" 
+                        ${isAltLoading ? 'disabled' : ''}
+                        class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-sm py-3 rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all font-bold disabled:opacity-60"
+                      >
+                        ${isAltLoading 
+                          ? `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Revirando a ficha...`
+                          : `<i data-lucide="shuffle" class="w-4 h-4"></i> Sugerir NOVO Alternativo`
+                        }
+                      </button>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="animate-fade-in">
+          <!-- Título do Treino + Barra de Progresso -->
+          <div class="mb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2 text-slate-200">
+                <i data-lucide="dumbbell" class="w-4 h-4 text-yellow-400"></i>
+                <h2 class="text-xs font-extrabold uppercase tracking-wider">${escapeHtml(workout.name)}</h2>
+              </div>
+              <span class="text-xs font-mono font-bold text-yellow-400">${doneCount}/${total}</span>
+            </div>
+            <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-yellow-400 to-orange-500 transition-all duration-300" style="width: ${progressPct}%"></div>
+            </div>
+          </div>
+
+          <!-- Bloco de Aquecimento -->
+          <div class="mb-4">${warmupHtml}</div>
+
+          <!-- Lista de Exercícios -->
+          <div class="mb-6">${exercisesHtml}</div>
+
+          <!-- Botão Finalizar Treino -->
+          <div class="pb-6">
+            <button 
+              onclick="handleFinishWorkout()" 
+              ${state.isSaving ? 'disabled' : ''}
+              class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-950/50 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              ${state.isSaving 
+                ? `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Finalizando...`
+                : `<i data-lucide="save" class="w-5 h-5"></i> Finalizar e Salvar Treino`
+              }
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHistoryView() {
+      const logsHtml = state.historyLogs.length === 0
+        ? `<div class="bg-slate-900/50 border border-slate-800 rounded-2xl p-8 text-center">
+            <i data-lucide="calendar-days" class="w-10 h-10 text-slate-600 mx-auto mb-3"></i>
+            <p class="text-sm text-slate-400 font-medium">Nenhum treino finalizado ainda nesta sessão.</p>
+            <p class="text-xs text-slate-500 mt-1">Conclua seu treino A, B ou C para registrar aqui.</p>
+          </div>`
+        : state.historyLogs.map(log => {
+            const items = log.completedItems || [];
+            const rate = log.totalExercises > 0 ? Math.round((items.length / log.totalExercises) * 100) : 0;
+            const isExp = !!state.expandedHistory[log.id];
+
+            return `
+              <div class="bg-slate-900 rounded-2xl border border-slate-800 mb-3 overflow-hidden">
+                <div onclick="toggleHistoryExpand('${log.id}')" class="p-4 flex items-center justify-between cursor-pointer active:bg-slate-800/50">
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                      <span class="inline-flex items-center gap-1 text-xs font-bold text-slate-200">
+                        <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-yellow-400"></i>
+                        ${formatDate(log.createdAt)}
+                      </span>
+                      ${log.achievement ? `
+                        <span class="text-[11px] bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full border border-yellow-500/40 font-bold inline-flex items-center gap-1">
+                          <i data-lucide="trophy" class="w-3 h-3"></i> ${escapeHtml(log.achievement)}
+                        </span>
+                      ` : ''}
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                      <span class="bg-slate-800 px-2 py-0.5 rounded border border-slate-700 font-semibold text-slate-200">Treino ${escapeHtml(log.workoutId)}</span>
+                      <span class="${rate === 100 ? 'text-emerald-400 font-semibold' : 'text-yellow-400'}">${rate}% Concluído</span>
+                    </div>
+                  </div>
+                  <i data-lucide="${isExp ? 'chevron-up' : 'chevron-down'}" class="w-5 h-5 text-slate-500"></i>
+                </div>
+
+                ${isExp ? `
+                  <div class="px-4 pb-4 pt-3 bg-slate-950/40 border-t border-slate-800/60">
+                    <p class="text-[11px] font-bold text-slate-500 uppercase mb-2">Exercícios Concluídos</p>
+                    ${items.length > 0 
+                      ? `<ul class="space-y-1.5">${items.map(it => `
+                          <li class="text-xs text-slate-300 flex items-center gap-2">
+                            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0"></i>
+                            <span>${escapeHtml(it.name)}</span>
+                          </li>`).join('')}
+                        </ul>`
+                      : `<p class="text-xs text-slate-500 italic">Nenhum exercício marcado.</p>`
+                    }
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+
+      return `
+        <div class="animate-fade-in">
+          <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-2 text-slate-200">
+              <i data-lucide="history" class="w-4 h-4 text-yellow-400"></i>
+              <h2 class="text-xs font-extrabold uppercase tracking-wider">Histórico de Treinos</h2>
+            </div>
+            <button onclick="handleExportBackup()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl border border-slate-700 flex items-center gap-1.5 font-semibold transition-all active:scale-95">
+              <i data-lucide="download" class="w-3.5 h-3.5 text-yellow-400"></i> Exportar JSON
+            </button>
+          </div>
+          ${logsHtml}
+        </div>
+      `;
+    }
+
+    function renderChatView() {
+      const msgsHtml = state.chatMessages.map(msg => `
+        <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[85%] rounded-2xl p-3.5 text-sm whitespace-pre-wrap leading-relaxed shadow ${
+            msg.role === 'user'
+              ? 'bg-yellow-400 text-black font-medium rounded-tr-none'
+              : 'bg-slate-800 text-slate-100 rounded-tl-none border border-slate-700/70'
+          }">${msg.role === 'user' ? escapeHtml(msg.text) : formatRichText(msg.text)}</div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="flex flex-col h-[calc(100vh-145px)] bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden animate-fade-in">
+          <!-- Barra Topo do Chat -->
+          <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-yellow-400">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-100 leading-none">Migs 💅</h3>
+                <span class="text-[11px] text-emerald-400 font-medium">Online • Pronta pra julgar</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensagens -->
+          <div id="chat-messages-box" class="flex-1 overflow-y-auto p-4 space-y-3.5">
+            ${msgsHtml}
+            ${state.isChatLoading ? `
+              <div class="flex justify-start">
+                <div class="bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2 text-slate-400 text-xs font-medium">
+                  <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-yellow-400"></i> Migs tá digitando...
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Sugestões Rápidas -->
+          <div class="px-3 pt-2 bg-slate-900/80 border-t border-slate-800/60">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+              ${['Dica pra secar rápido', 'Fofoca dos famosos', 'Notícias do dia'].map(tag => `
+                <button onclick="sendChatMessage('${tag}')" class="whitespace-nowrap bg-slate-800 text-xs text-slate-300 px-3 py-1.5 rounded-full border border-slate-700 hover:border-yellow-400 hover:text-yellow-400 transition-colors">
+                  ${tag}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Input e Microfone -->
+          <div class="p-3 bg-slate-900 flex items-center gap-2">
+            <input 
+              type="text" 
+              id="chat-input" 
+              onkeydown="if(event.key==='Enter') sendChatMessage()"
+              placeholder="${state.isRecordingVoice ? 'Ouvindo seu áudio...' : 'Manda o babado...'}" 
+              ${state.isRecordingVoice ? 'disabled' : ''}
+              class="flex-1 bg-slate-950 text-white text-sm rounded-xl px-3.5 py-3 outline-none focus:ring-1 focus:ring-yellow-400 border border-slate-800 placeholder:text-slate-600 disabled:opacity-50"
+            />
+            <button 
+              onclick="startVoiceRecognition()" 
+              aria-label="Gravar áudio"
+              class="p-3 rounded-xl transition-all ${state.isRecordingVoice ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700'}"
+            >
+              <i data-lucide="mic" class="w-5 h-5"></i>
+            </button>
+            <button 
+              onclick="sendChatMessage()" 
+              aria-label="Enviar mensagem"
+              class="bg-yellow-400 hover:bg-yellow-300 text-black p-3 rounded-xl active:scale-95 transition-transform"
+            >
+              <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      const main = document.getElementById('main-content');
+      if (!main) return;
+
+      if (['A', 'B', 'C'].includes(state.currentTab)) {
+        main.innerHTML = renderWorkoutView(state.currentTab);
+      } else if (state.currentTab === 'History') {
+        main.innerHTML = renderHistoryView();
+      } else if (state.currentTab === 'Chat') {
+        main.innerHTML = renderChatView();
+      }
+
+      lucide.createIcons();
+    }
+
+    // Inicializar App
+    render();
+    initCloudSync();
+  </script>
+</body>
+</html>
