@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>HypertrophyTracker • Roger & Gabriel</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #020617; /* slate-950 */
+      color: #f1f5f9; /* slate-100 */
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    .animate-scale-in {
+      animation: scaleIn 0.2s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 pb-28 select-none">
+
+  <!-- TELA DE SELEÇÃO DE USUÁRIO (ABRE AUTOMATICAMENTE AO INICIAR) -->
+  <div id="profile-gate" class="fixed inset-0 z-[80] bg-slate-950/98 backdrop-blur-md flex flex-col items-center justify-center p-5">
+    <div class="w-full max-w-sm animate-scale-in">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-500 text-black shadow-lg shadow-yellow-500/20 mb-4">
+          <i data-lucide="dumbbell" class="w-7 h-7 stroke-[2.5]"></i>
+        </div>
+        <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 tracking-tight">
+          Hypertrophy<span class="text-slate-100">Tracker</span>
+        </h1>
+        <p class="text-xs text-slate-400 font-medium mt-1">Carga & Definição • 1h Max</p>
+        <h2 class="text-lg font-extrabold text-white mt-6">Quem vai treinar agora?</h2>
+        <p class="text-xs text-slate-400 mt-1">Os pesos, fichas e relatórios são salvos separadamente.</p>
+      </div>
+
+      <div class="space-y-3.5">
+        <!-- Card Roger -->
+        <button 
+          type="button"
+          onclick="selectProfile('roger')" 
+          class="w-full group bg-slate-900 hover:bg-slate-800/90 border-2 border-slate-800 hover:border-yellow-400 rounded-2xl p-4 flex items-center justify-between transition-all active:scale-95 text-left shadow-xl cursor-pointer"
+        >
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 text-black font-black text-xl flex items-center justify-center shadow-md">
+              R
+            </div>
+            <div>
+              <h3 class="text-base font-extrabold text-white group-hover:text-yellow-400 transition-colors">Roger</h3>
+              <p id="gate-stats-roger" class="text-xs text-slate-400 mt-0.5">Ficha, cargas e relatórios do Roger</p>
+            </div>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-yellow-400 group-hover:text-black text-slate-400 flex items-center justify-center transition-colors">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          </div>
+        </button>
+
+        <!-- Card Gabriel -->
+        <button 
+          type="button"
+          onclick="selectProfile('gabriel')" 
+          class="w-full group bg-slate-900 hover:bg-slate-800/90 border-2 border-slate-800 hover:border-cyan-400 rounded-2xl p-4 flex items-center justify-between transition-all active:scale-95 text-left shadow-xl cursor-pointer"
+        >
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-500 text-black font-black text-xl flex items-center justify-center shadow-md">
+              G
+            </div>
+            <div>
+              <h3 class="text-base font-extrabold text-white group-hover:text-cyan-400 transition-colors">Gabriel</h3>
+              <p id="gate-stats-gabriel" class="text-xs text-slate-400 mt-0.5">Ficha, cargas e relatórios do Gabriel</p>
+            </div>
+          </div>
+          <div class="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-cyan-400 group-hover:text-black text-slate-400 flex items-center justify-center transition-colors">
+            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+          </div>
+        </button>
+      </div>
+
+      <p class="text-center text-[11px] text-slate-500 mt-6 flex items-center justify-center gap-1.5">
+        <i data-lucide="cloud" class="w-3.5 h-3.5 text-emerald-400"></i> Sincronização vitalícia na nuvem ativada
+      </p>
+    </div>
+  </div>
+
+  <!-- Container Principal Responsivo -->
+  <div id="app" class="max-w-lg mx-auto min-h-screen flex flex-col">
+    
+    <!-- Cabeçalho Fixo -->
+    <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-white/5 pt-4 pb-3 px-4 shadow-lg">
+      <div class="flex justify-between items-center mb-3 gap-2">
+        <div class="min-w-0">
+          <h1 class="text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 tracking-tight">
+            Hypertrophy<span class="text-slate-100">Tracker</span>
+          </h1>
+          <div class="text-xs text-slate-400 font-medium flex items-center gap-1.5 mt-0.5 flex-wrap">
+            <span class="truncate">Carga & Definição • 1h Max</span>
+            <span id="connection-badge" class="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+              <i data-lucide="loader-2" class="w-2.5 h-2.5 text-yellow-400 animate-spin"></i> Conectando
+            </span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <!-- Botão Trocar Usuário (Roger / Gabriel) -->
+          <button 
+            type="button"
+            onclick="openProfileSelector()" 
+            id="active-user-pill"
+            title="Trocar de usuário"
+            class="px-2.5 py-2 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-yellow-400/60 text-xs font-bold text-slate-100 flex items-center gap-1.5 transition-all active:scale-95"
+          >
+            <span id="active-user-avatar" class="w-5 h-5 rounded-md bg-yellow-400 text-black font-black text-[11px] flex items-center justify-center">R</span>
+            <span id="active-user-name">Roger</span>
+            <i data-lucide="repeat" class="w-3 h-3 text-slate-400"></i>
+          </button>
+
+          <!-- Botão de Configurações -->
+          <button 
+            type="button"
+            onclick="openSettingsModal()" 
+            aria-label="Configurações"
+            class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-yellow-400 hover:border-yellow-500/40 transition-all active:scale-95 relative"
+          >
+            <i data-lucide="settings" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Navegação (Abas) -->
+      <nav class="flex p-1 bg-slate-900 rounded-xl gap-1 border border-slate-800/80">
+        <button type="button" onclick="switchTab('A')" id="tab-A" class="tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all bg-yellow-400 text-black shadow-md">
+          A
+        </button>
+        <button type="button" onclick="switchTab('B')" id="tab-B" class="tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+          B
+        </button>
+        <button type="button" onclick="switchTab('C')" id="tab-C" class="tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+          C
+        </button>
+        <button type="button" onclick="switchTab('History')" id="tab-History" aria-label="Histórico e Relatórios" class="tab-btn flex-1 py-2.5 px-2 rounded-lg transition-all flex items-center justify-center text-slate-400 hover:text-slate-200">
+          <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+        </button>
+        <button type="button" onclick="switchTab('Chat')" id="tab-Chat" aria-label="Chat com a Migs" class="tab-btn flex-1 py-2.5 px-2 rounded-lg transition-all flex items-center justify-center relative text-slate-400 hover:text-slate-200">
+          <i data-lucide="message-circle" class="w-5 h-5"></i>
+          <span id="chat-unread-badge" class="hidden absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-slate-900 animate-bounce">
+            1
+          </span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Área de Conteúdo Dinâmico -->
+    <main id="main-content" class="flex-1 px-4 py-4">
+      <!-- Renderizado via JavaScript -->
+    </main>
+  </div>
+
+  <!-- Modal: Registrar e Acompanhar Peso (Carga) -->
+  <div id="weight-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+    <div class="bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-800 shadow-2xl overflow-hidden animate-scale-in">
+      <div class="p-5">
+        <div class="flex items-center justify-between mb-1">
+          <span id="weight-modal-user-tag" class="text-[11px] font-extrabold uppercase tracking-wider text-yellow-400 flex items-center gap-1">
+            <i data-lucide="dumbbell" class="w-3.5 h-3.5"></i> Controle de Carga
+          </span>
+          <button type="button" onclick="closeWeightModal()" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <h3 id="weight-modal-title" class="text-lg font-bold text-white leading-snug mb-1"></h3>
+        <p id="weight-modal-last" class="text-xs text-slate-400 mb-4"></p>
+
+        <!-- Controle Rápido de Kg -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 mb-3">
+          <label for="weight-input" class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 text-center mb-2">
+            Carga Atual (kg)
+          </label>
+          <div class="flex items-center justify-between gap-2">
+            <button type="button" onclick="adjustWeightInput(-2)" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs active:scale-95">
+              -2
+            </button>
+            <button type="button" onclick="adjustWeightInput(-1)" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs active:scale-95">
+              -1
+            </button>
+            <input
+              type="number"
+              step="0.5"
+              min="0"
+              inputmode="decimal"
+              id="weight-input"
+              placeholder="0"
+              class="w-24 text-center bg-slate-900 border border-yellow-500/40 rounded-xl py-2 text-2xl font-black text-yellow-400 focus:border-yellow-400 outline-none"
+            />
+            <button type="button" onclick="adjustWeightInput(1)" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs active:scale-95">
+              +1
+            </button>
+            <button type="button" onclick="adjustWeightInput(2)" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs active:scale-95">
+              +2
+            </button>
+          </div>
+        </div>
+
+        <input
+          type="text"
+          id="weight-note-input"
+          placeholder="Obs. opcional (ex: 8 reps limpas, falhei na 7ª)..."
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:border-yellow-400 outline-none mb-4 placeholder:text-slate-600"
+        />
+
+        <!-- Histórico Recente do Exercício -->
+        <div id="weight-history-box" class="mb-4 max-h-28 overflow-y-auto space-y-1.5"></div>
+
+        <button type="button" onclick="saveExerciseWeight()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black py-3.5 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-yellow-900/20 active:scale-95 transition-all">
+          <i data-lucide="save" class="w-4 h-4"></i> Salvar Carga na Nuvem
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificação Toast Customizada -->
+  <div id="toast-banner" class="hidden fixed top-24 left-1/2 transform -translate-x-1/2 z-[90] max-w-xs w-[90%] bg-slate-800 border border-yellow-400/50 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 animate-fade-in">
+    <i data-lucide="sparkles" class="w-5 h-5 text-yellow-400 flex-shrink-0"></i>
+    <p id="toast-message" class="text-xs font-semibold leading-snug"></p>
+  </div>
+
+  <!-- Modal: Relatar Dor / Problema no Exercício -->
+  <div id="report-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+    <div class="bg-slate-900 w-full max-w-sm rounded-2xl border border-slate-800 shadow-2xl overflow-hidden animate-scale-in">
+      <div class="p-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-lg font-bold text-white">Dor ou Incômodo?</h3>
+          <button type="button" onclick="closeReportModal()" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        <p id="report-exercise-name" class="text-xs text-yellow-400 font-semibold mb-3"></p>
+        <textarea 
+          id="report-textarea" 
+          placeholder="Descreva o motivo (ex: senti o ombro, aparelho ocupado ou quebrado)..." 
+          class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm focus:border-yellow-400 outline-none resize-none h-24 mb-4 placeholder:text-slate-600"
+        ></textarea>
+        <div class="flex flex-col gap-2.5">
+          <button type="button" id="btn-swap-ai" onclick="handleSaveObservation(true)" class="bg-yellow-400 hover:bg-yellow-300 text-black py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all active:scale-95">
+            <i data-lucide="zap" class="w-4 h-4"></i> Pedir Substituto Agora (IA)
+          </button>
+          <button type="button" onclick="handleSaveObservation(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 py-3 rounded-xl font-semibold text-sm transition-all">
+            Apenas Salvar Nota
+          </button>
+        </div>
+      </div>
+      <button type="button" onclick="closeReportModal()" class="w-full py-3 bg-slate-950 text-slate-500 text-xs font-semibold border-t border-slate-800 hover:text-slate-300">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal: Configurações (Chave API Gemini & Perfis) -->
+  <div id="settings-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+    <div class="bg-slate-900 w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl overflow-hidden animate-scale-in max-h-[90vh] flex flex-col">
+      <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="settings" class="w-5 h-5 text-yellow-400"></i>
+          <h3 class="text-base font-bold text-white">Configurações & Google AI Studio</h3>
+        </div>
+        <button type="button" onclick="closeSettingsModal()" class="text-slate-400 hover:text-white p-1">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-5 text-sm">
+        <div>
+          <label for="gemini-api-input" class="block text-xs font-bold uppercase tracking-wider text-yellow-400 mb-1.5">
+            Chave da API do Gemini (Google AI Studio)
+          </label>
+          <p class="text-xs text-slate-400 mb-2 leading-relaxed">
+            Cole abaixo sua chave gratuita do <strong>Google AI Studio</strong>. Ela fica salva permanentemente na nuvem para <strong>Roger</strong> e <strong>Gabriel</strong>.
+          </p>
+          <div class="flex gap-2">
+            <input 
+              type="password" 
+              id="gemini-api-input" 
+              placeholder="AIzaSy..." 
+              class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white text-xs focus:border-yellow-400 outline-none"
+            />
+            <button type="button" onclick="saveCustomApiKey()" class="bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-4 py-2.5 rounded-xl text-xs transition-all active:scale-95">
+              Salvar
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-4 space-y-2">
+          <h4 class="text-xs font-bold text-slate-200 uppercase flex items-center gap-1.5">
+            <i data-lucide="users" class="w-4 h-4 text-yellow-400"></i> Perfis Independentes (Roger & Gabriel):
+          </h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Cada usuário possui sua própria ficha de treino, histórico de cargas, frequência semanal e relatórios individuais gerados pela <strong>Migs</strong>. Para alternar a qualquer momento, toque no botão com o nome do usuário no topo da tela.
+          </p>
+        </div>
+      </div>
+
+      <button type="button" onclick="closeSettingsModal()" class="w-full py-3.5 bg-slate-950 text-slate-400 text-xs font-bold border-t border-slate-800 hover:text-white">
+        Fechar
+      </button>
+    </div>
+  </div>
+
+  <!-- Script Síncrono Principal (Garante resposta imediata ao toque sem bloquear na rede) -->
+  <script>
+    // --- CONFIGURAÇÃO DO FIREBASE (PROJETO TREINO-BIEL) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyB7rO_uY-VxifNCPRGucKcjbKmP00qLhhw",
+      authDomain: "treino-biel.firebaseapp.com",
+      projectId: "treino-biel",
+      storageBucket: "treino-biel.firebasestorage.app",
+      messagingSenderId: "555455890844",
+      appId: "1:555455890844:web:4a5af09ef4f55dede37459"
+    };
+
+    const GEMINI_TEXT_MODEL = "gemini-3-flash-preview";
+
+    // --- FICHA DE TREINO BASE V3 (FOCO EM CARGA, MENOS REPETIÇÕES E DEFINIÇÃO) ---
+    const defaultWorkoutPlan = {
+      createdAt: new Date().toISOString(),
+      A: {
+        name: "Peito, Ombros e Tríceps (Força)",
+        exercises: [
+          { 
+            id: 1, name: "Supino Inclinado com Halteres", sets: 3, reps: "6-8", focus: "Peito Superior/Geral", rest: 90, type: "Halter", 
+            description: "🎯 POSTURA: Ajuste o banco a 30° ou 45° (não deixe muito reto). Pés firmes no chão, glúteo colado e escápulas fechadas para trás, estufando o peito.\n⏱️ TEMPO: Desça segurando a carga por 3 segundos e empurre com explosão (1 segundo).\n✅ EXECUÇÃO: Desça os halteres alinhados com a parte superior do peito, alongando bem. Suba aproximando os halteres sem bater um no outro."
+          },
+          { 
+            id: 2, name: "Supino Reto Articulado (Máquina)", sets: 3, reps: "6-8", focus: "Peito Geral (Carga)", rest: 90, type: "Máquina", 
+            description: "🎯 POSTURA: Costas totalmente chapadas no encosto. Ajuste o banco para que as manoplas fiquem na linha do meio do peitoral.\n⏱️ TEMPO: 3 segundos na descida controlada e 1 segundo na empurrada máxima.\n✅ EXECUÇÃO: Ideal para colocar bastante carga com segurança. Empurre até quase esticar os braços (sem travar os cotovelos) e esmague o peito."
+          },
+          { 
+            id: 3, name: "Crucifixo na Polia Alta (Crossover)", sets: 3, reps: "8-10", focus: "Peito Inferior/Miolo", rest: 60, type: "Polia", 
+            description: "🎯 POSTURA: Polias ajustadas no topo. Dê um passo à frente, incline levemente o tronco e trave o abdômen.\n⏱️ TEMPO: Feche em 1s segurando a contração e abra resistindo por 3s.\n✅ EXECUÇÃO: Cotovelos semiflexionados e fixos. Traga as mãos em direção à linha da cintura, cruzando levemente no final para maximizar o gasto energético."
+          },
+          { 
+            id: 4, name: "Desenvolvimento Militar com Halteres", sets: 3, reps: "6-8", focus: "Ombros Geral", rest: 90, type: "Halter", 
+            description: "🎯 POSTURA: Sentado no banco a 80-90°, abdômen bem contraído para não arquear a lombar. Cotovelos apontando levemente para frente.\n⏱️ TEMPO: Empurre forte (1s), desça controlando o peso pesado (3s).\n✅ EXECUÇÃO: Desça os halteres até a altura do queixo/orelhas e empurre para o alto sem bater os pesos no topo."
+          },
+          { 
+            id: 5, name: "Elevação Lateral com Halteres", sets: 3, reps: "8-10", focus: "Ombro Lateral", rest: 60, type: "Halter", 
+            description: "🎯 POSTURA: Em pé, tronco inclinado milimetricamente para frente, joelhos destravados e abdômen firme.\n⏱️ TEMPO: Suba firme em 1s, segure 1s no topo e desça em 3s sem despencar.\n✅ EXECUÇÃO: Eleve os halteres lateralmente guiando pelos cotovelos até a altura dos ombros. Evite balançar o tronco para roubar."
+          },
+          { 
+            id: 6, name: "Tríceps Testa com Halteres", sets: 3, reps: "6-8", focus: "Tríceps (Carga)", rest: 60, type: "Halter", 
+            description: "🎯 POSTURA: Deitado no banco plano, braços estendidos apontando para o teto com pegada neutra (palmas viradas uma para a outra).\n⏱️ TEMPO: Desça em 3s até a lateral da cabeça, estenda com força em 1s.\n✅ EXECUÇÃO: Mantenha os cotovelos apontados para o teto e imóveis; dobre apenas o antebraço levando os halteres ao lado das orelhas."
+          }
+        ]
+      },
+      B: {
+        name: "Costas, Bíceps e Post. Ombro",
+        exercises: [
+          { 
+            id: 7, name: "Puxada Alta Pegada Aberta", sets: 3, reps: "6-8", focus: "Dorsal (Largura)", rest: 90, type: "Polia", 
+            description: "🎯 POSTURA: Pernas bem travadas na almofada, peito estufado e tronco inclinado bem de leve para trás.\n⏱️ TEMPO: Puxe explosivo em 1s, alongue na subida controlando por 3s.\n✅ EXECUÇÃO: Pegada um pouco além da largura dos ombros. Puxe a barra até a parte superior do peito (clavícula) focando em descer os cotovelos."
+          },
+          { 
+            id: 8, name: "Remada Curvada com Barra (ou Cavalinho)", sets: 3, reps: "6-8", focus: "Costas (Espessura/Carga)", rest: 90, type: "Barra", 
+            description: "🎯 POSTURA: Pés na largura dos ombros, joelhos levemente dobrados, tronco inclinado a ~45° com a coluna reta e abdômen blindado.\n⏱️ TEMPO: Puxe forte em 1s, desça controlando o peso por 3s.\n✅ EXECUÇÃO: Exercício rei para gasto calórico e densidade. Puxe a barra em direção ao umbigo esmagando as escápulas."
+          },
+          { 
+            id: 9, name: "Remada Unilateral com Halter (Serrote)", sets: 3, reps: "6-8", focus: "Dorsal e Core", rest: 75, type: "Halter", 
+            description: "🎯 POSTURA: Uma mão e um joelho apoiados no banco, pé de apoio firme no chão. Coluna paralela ao solo.\n⏱️ TEMPO: Puxe em 1s, segure 1s contraído, desça alongando em 3s.\n✅ EXECUÇÃO: Puxe o halter pesado em direção ao quadril (como se guardasse no bolso), mantendo o tronco estável sem girar."
+          },
+          { 
+            id: 10, name: "Crucifixo Inverso na Máquina", sets: 3, reps: "8-10", focus: "Posterior de Ombro", rest: 60, type: "Máquina", 
+            description: "🎯 POSTURA: Peito encostado no apoio do Peck Deck invertido, banco ajustado para os braços ficarem na linha dos ombros.\n⏱️ TEMPO: Abra em 1s, segure 1s atrás, feche devagar em 3s.\n✅ EXECUÇÃO: Empurre as alças para trás abrindo os braços sem deixar os ombros subirem em direção às orelhas."
+          },
+          { 
+            id: 11, name: "Rosca Direta com Barra W", sets: 3, reps: "6-8", focus: "Bíceps Geral (Carga)", rest: 60, type: "Barra", 
+            description: "🎯 POSTURA: Em pé, pés paralelos, glúteos e abdômen contraídos para não balançar a lombar. Cotovelos colados ao lado do corpo.\n⏱️ TEMPO: Suba com potência em 1s, desça freando a carga por 3s.\n✅ EXECUÇÃO: Flexione os cotovelos trazendo a barra até a altura do peito sem jogar os cotovelos para frente."
+          },
+          { 
+            id: 12, name: "Rosca Alternada no Banco 45°", sets: 3, reps: "8-10", focus: "Bíceps (Alongamento)", rest: 60, type: "Halter", 
+            description: "🎯 POSTURA: Sente-se no banco inclinado a 45°, costas e cabeça apoiadas. Deixe os braços pendurados perpendicularmente ao chão.\n⏱️ TEMPO: Suba girando o punho (1s), desça bem lento (3s).\n✅ EXECUÇÃO: Com o ombro travado para trás, flexione um braço de cada vez aproveitando o alongamento máximo na descida."
+          }
+        ]
+      },
+      C: {
+        name: "Pernas Completas (Alto Gasto)",
+        exercises: [
+          { 
+            id: 13, name: "Agachamento Hack Machine", sets: 4, reps: "6-8", focus: "Quadríceps e Glúteo", rest: 90, type: "Máquina", 
+            description: "🎯 POSTURA: Costas e ombros firmes nos apoios da máquina. Pés na plataforma na largura dos ombros, pontas levemente para fora.\n⏱️ TEMPO: Desça profundo em 3s, suba explodindo em 1s.\n✅ EXECUÇÃO: Desça até passar de 90° nos joelhos sem tirar a lombar do encosto. Empurre com o pé inteiro sem travar os joelhos no topo."
+          },
+          { 
+            id: 14, name: "Leg Press 45°", sets: 3, reps: "6-8", focus: "Quadríceps (Carga)", rest: 90, type: "Máquina", 
+            description: "🎯 POSTURA: Quadril bem encaixado no fundo do banco, mãos segurando firme nas alças laterais.\n⏱️ TEMPO: 3 segundos descendo até o limite da mobilidade, 1 segundo empurrando.\n✅ EXECUÇÃO: Desça a plataforma trazendo os joelhos em direção ao peito, parando antes do quadril levantar do banco. Carga alta!"
+          },
+          { 
+            id: 15, name: "Levantamento Terra Romeno (RDL)", sets: 3, reps: "6-8", focus: "Posterior e Glúteo", rest: 90, type: "Barra/Halter", 
+            description: "🎯 POSTURA: Em pé segurando barra ou halteres pesados. Peito aberto, escápulas travadas, joelhos levemente flexionados e fixos.\n⏱️ TEMPO: Desça em 3s jogando o quadril para trás, suba firme em 1s.\n✅ EXECUÇÃO: Desça o peso rente às coxas/canelas até sentir o posterior alongar no máximo. Suba contraindo glúteos sem hiperestender a lombar."
+          },
+          { 
+            id: 16, name: "Mesa Flexora", sets: 3, reps: "6-8", focus: "Posterior de Coxa", rest: 75, type: "Máquina", 
+            description: "🎯 POSTURA: Deitado de bruços, joelhos alinhados com o eixo da máquina e quadril pressionado contra o banco.\n⏱️ TEMPO: Puxe forte (1s), segure 1s perto do glúteo, desça em 3s.\n✅ EXECUÇÃO: Flexione os joelhos trazendo o rolo em direção ao glúteo sem levantar o quadril do banco para roubar."
+          },
+          { 
+            id: 17, name: "Cadeira Extensora", sets: 3, reps: "8-10", focus: "Quadríceps (Queima)", rest: 60, type: "Máquina", 
+            description: "🎯 POSTURA: Costas apoiadas, joelhos alinhados com a articulação da máquina. Segure firme nas alças laterais.\n⏱️ TEMPO: Suba em 1s, SEGURE 1s travado no topo, desça em 3s.\n✅ EXECUÇÃO: Estenda completamente os joelhos esmagando a coxa no topo para finalizar a fadiga metabólica."
+          },
+          { 
+            id: 18, name: "Panturrilha em Pé (Máquina/Smith)", sets: 4, reps: "8-10", focus: "Panturrilha (Carga)", rest: 60, type: "Máquina", 
+            description: "🎯 POSTURA: Corpo reto, abdômen travado, joelhos estendidos (sem travar para trás). Ponta dos pés apoiada no degrau.\n⏱️ TEMPO: Suba máximo (1s), segure 1s no topo, desça alongando por 3s.\n✅ EXECUÇÃO: Amplitude total com carga alta. Deixe o calcanhar descer bem abaixo da linha do degrau antes de subir novamente."
+          }
+        ]
+      }
+    };
+
+    const PROFILE_META = {
+      roger: {
+        id: 'roger',
+        name: 'Roger',
+        initial: 'R',
+        badgeClass: 'bg-yellow-400 text-black',
+        greeting: "Oie Roger! 💅 Sou a Migs, sua administradora e personal virtual. Sua ficha, cargas e estatísticas estão isoladas só pra você. Bora treinar pesado hoje? 😘"
+      },
+      gabriel: {
+        id: 'gabriel',
+        name: 'Gabriel',
+        initial: 'G',
+        badgeClass: 'bg-cyan-400 text-black',
+        greeting: "Oie Gabriel! 💅 Sou a Migs, sua administradora e personal virtual. Sua ficha, seus pesos e sua frequência estão salvos separados aqui. Bora amassar no treino hoje? 😘"
+      }
+    };
+
+    function createEmptyProfileState(profileId) {
+      const meta = PROFILE_META[profileId];
+      let savedPlan = null;
+      let savedWeights = null;
+      let savedHistory = null;
+      let savedExtras = null;
+      try {
+        savedPlan = JSON.parse(localStorage.getItem(`HT_${profileId}_PLAN_V3`));
+        savedWeights = JSON.parse(localStorage.getItem(`HT_${profileId}_WEIGHTS`));
+        savedHistory = JSON.parse(localStorage.getItem(`HT_${profileId}_HISTORY`));
+        savedExtras = JSON.parse(localStorage.getItem(`HT_${profileId}_EXTRAS`));
+      } catch (e) {}
+
+      return {
+        workoutPlan: savedPlan || JSON.parse(JSON.stringify(defaultWorkoutPlan)),
+        exerciseWeights: savedWeights || {},
+        historyLogs: savedHistory || [],
+        completedExercises: savedExtras?.completedExercises || {},
+        expandedCards: {},
+        cardActivePanel: {},
+        alternativeHistory: {},
+        alternativeLoading: {},
+        swappedExercises: savedExtras?.swappedExercises || {},
+        expandedHistory: {},
+        aiReport: savedExtras?.aiReport || null,
+        aiReportLoading: false,
+        warmupPlan: null,
+        warmupLoading: false,
+        chatMessages: (savedExtras?.chatMessages && savedExtras.chatMessages.length > 0)
+          ? savedExtras.chatMessages
+          : [{ role: 'model', text: meta.greeting }],
+        unreadChatCount: 0,
+        lastCloudBackup: savedExtras?.lastCloudBackup || null
+      };
+    }
+
+    // --- ESTADO GLOBAL DA APLICAÇÃO ---
+    const state = {
+      activeProfile: null, // 'roger' ou 'gabriel' (perguntado sempre ao abrir o app)
+      currentTab: 'A',
+      profiles: {
+        roger: createEmptyProfileState('roger'),
+        gabriel: createEmptyProfileState('gabriel')
+      },
+      selectedExerciseForWeight: null,
+      selectedExerciseForModal: null,
+      isSaving: false,
+      isChatLoading: false,
+      isRecordingVoice: false,
+      customApiKey: localStorage.getItem('HT_SHARED_GEMINI_KEY') || '',
+      user: null,
+      db: null,
+      fsModules: null,
+      appId: 'treino-biel',
+      usePublicPath: true,
+      unsubscribeHistory: null
+    };
+
+    // --- UTILITÁRIOS SEGUROS ---
+    function safeCreateIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        try { window.lucide.createIcons(); } catch (e) {}
+      }
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatRichText(text) {
+      if (!text) return '';
+      let escaped = escapeHtml(text);
+      escaped = escaped.replace(/^\s*\*\s/gm, '• ');
+      escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-white">$1</strong>');
+      escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="underline text-yellow-400 hover:text-yellow-300 font-semibold">$1</a>');
+      return escaped;
+    }
+
+    function formatDate(timestamp) {
+      if (!timestamp) return 'Data pendente...';
+      let date;
+      if (timestamp?.toDate) date = timestamp.toDate();
+      else if (typeof timestamp === 'string' || typeof timestamp === 'number') date = new Date(timestamp);
+      else date = timestamp;
+      if (!date || isNaN(date.getTime())) return 'Agora';
+      return new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      }).format(date);
+    }
+
+    function formatShortDate(timestamp) {
+      if (!timestamp) return '';
+      const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
+      if (isNaN(date.getTime())) return '';
+      return new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' }).format(date);
+    }
+
+    function getActiveProfileId() {
+      return state.activeProfile || 'roger';
+    }
+
+    function getActiveData() {
+      return state.profiles[getActiveProfileId()];
+    }
+
+    function getActiveMeta() {
+      return PROFILE_META[getActiveProfileId()];
+    }
+
+    let toastTimeout = null;
+    function showToast(msg) {
+      const banner = document.getElementById('toast-banner');
+      const textEl = document.getElementById('toast-message');
+      if (!banner || !textEl) return;
+      textEl.textContent = msg;
+      banner.classList.remove('hidden');
+      safeCreateIcons();
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 3600);
+    }
+
+    // --- SELEÇÃO DE PERFIL (ROGER / GABRIEL) ---
+    function updateGateStatsPreview() {
+      ['roger', 'gabriel'].forEach(pid => {
+        const el = document.getElementById(`gate-stats-${pid}`);
+        if (!el) return;
+        const pData = state.profiles[pid];
+        const totalWorkouts = pData.historyLogs.length;
+        const trackedWeights = Object.keys(pData.exerciseWeights || {}).length;
+        if (totalWorkouts > 0 || trackedWeights > 0) {
+          el.textContent = `${totalWorkouts} treino(s) • ${trackedWeights} carga(s) registrada(s)`;
+        } else {
+          el.textContent = `Ficha, cargas e relatórios de ${PROFILE_META[pid].name}`;
+        }
+      });
+    }
+
+    function applyProfileHeaderUI(profileId) {
+      const meta = PROFILE_META[profileId];
+      const avatarEl = document.getElementById('active-user-avatar');
+      const nameEl = document.getElementById('active-user-name');
+      const pillEl = document.getElementById('active-user-pill');
+      if (avatarEl) {
+        avatarEl.textContent = meta.initial;
+        avatarEl.className = `w-5 h-5 rounded-md font-black text-[11px] flex items-center justify-center ${meta.badgeClass}`;
+      }
+      if (nameEl) nameEl.textContent = meta.name;
+      if (pillEl) {
+        pillEl.className = profileId === 'gabriel'
+          ? 'px-2.5 py-2 rounded-xl bg-slate-900 border border-cyan-500/40 hover:border-cyan-400 text-xs font-bold text-slate-100 flex items-center gap-1.5 transition-all active:scale-95'
+          : 'px-2.5 py-2 rounded-xl bg-slate-900 border border-yellow-500/40 hover:border-yellow-400 text-xs font-bold text-slate-100 flex items-center gap-1.5 transition-all active:scale-95';
+      }
+    }
+
+    window.selectProfile = function(profileId) {
+      if (!PROFILE_META[profileId]) return;
+      state.activeProfile = profileId;
+
+      const gate = document.getElementById('profile-gate');
+      if (gate) gate.classList.add('hidden');
+
+      applyProfileHeaderUI(profileId);
+      subscribeActiveProfileHistory();
+      render();
+      showToast(`Perfil ${PROFILE_META[profileId].name} ativado!`);
+    };
+
+    window.openProfileSelector = function() {
+      updateGateStatsPreview();
+      const gate = document.getElementById('profile-gate');
+      if (gate) {
+        gate.classList.remove('hidden');
+        safeCreateIcons();
+      }
+    };
+
+    // --- CÁLCULO DE FREQUÊNCIA E ESTATÍSTICAS INDIVIDUAIS ---
+    function calculateFrequencyMetrics(logs) {
+      if (!logs || logs.length === 0) {
+        return {
+          total: 0,
+          last7Days: 0,
+          last30Days: 0,
+          avgDaysBetween: null,
+          lastWorkoutDate: null,
+          distribution: { A: 0, B: 0, C: 0 }
+        };
+      }
+
+      const now = Date.now();
+      const dayMs = 1000 * 60 * 60 * 24;
+      const dates = logs
+        .map(l => (l.createdAt?.toDate ? l.createdAt.toDate() : new Date(l.createdAt)))
+        .filter(d => !isNaN(d.getTime()))
+        .sort((a, b) => b - a);
+
+      const last7Days = dates.filter(d => (now - d.getTime()) <= 7 * dayMs).length;
+      const last30Days = dates.filter(d => (now - d.getTime()) <= 30 * dayMs).length;
+
+      let avgDaysBetween = null;
+      if (dates.length >= 2) {
+        let totalDiff = 0;
+        for (let i = 0; i < dates.length - 1; i++) {
+          totalDiff += (dates[i] - dates[i + 1]) / dayMs;
+        }
+        avgDaysBetween = (totalDiff / (dates.length - 1)).toFixed(1);
+      }
+
+      const distribution = { A: 0, B: 0, C: 0 };
+      logs.forEach(l => {
+        if (distribution[l.workoutId] !== undefined) distribution[l.workoutId]++;
+      });
+
+      return {
+        total: logs.length,
+        last7Days,
+        last30Days,
+        avgDaysBetween,
+        lastWorkoutDate: dates[0] ? formatDate(dates[0]) : null,
+        distribution
+      };
+    }
+
+    // --- FIRESTORE: REFERÊNCIAS E PERSISTÊNCIA ---
+    function getProfileDocRef(profileId, docName) {
+      const { doc } = state.fsModules;
+      if (state.usePublicPath) {
+        return doc(state.db, 'artifacts', state.appId, 'public', 'data', 'user_profiles', `${profileId}_${docName}`);
+      }
+      return doc(state.db, 'artifacts', state.appId, 'users', state.user.uid, 'user_profiles', `${profileId}_${docName}`);
+    }
+
+    function getProfileHistoryColRef(profileId) {
+      const { collection } = state.fsModules;
+      if (state.usePublicPath) {
+        return collection(state.db, 'artifacts', state.appId, 'public', 'data', `history_${profileId}`);
+      }
+      return collection(state.db, 'artifacts', state.appId, 'users', state.user.uid, `history_${profileId}`);
+    }
+
+    function buildProfileBackupPayload(profileId) {
+      const pData = state.profiles[profileId];
+      const meta = PROFILE_META[profileId];
+      const freq = calculateFrequencyMetrics(pData.historyLogs);
+      return {
+        user: meta.name,
+        profileId,
+        exportDate: new Date().toISOString(),
+        frequencyStats: freq,
+        workoutPlan: pData.workoutPlan,
+        exerciseWeights: pData.exerciseWeights,
+        historyLogs: pData.historyLogs,
+        aiReport: pData.aiReport,
+        swappedExercises: pData.swappedExercises
+      };
+    }
+
+    async function persistProfileExtrasToCloud(profileId = getActiveProfileId()) {
+      if (!profileId) return;
+      const pData = state.profiles[profileId];
+      const extrasPayload = {
+        completedExercises: pData.completedExercises || {},
+        swappedExercises: pData.swappedExercises || {},
+        aiReport: pData.aiReport || null,
+        chatMessages: (pData.chatMessages || []).slice(-30),
+        lastCloudBackup: pData.lastCloudBackup || null,
+        updatedAt: new Date().toISOString()
+      };
+      try { localStorage.setItem(`HT_${profileId}_EXTRAS`, JSON.stringify(extrasPayload)); } catch (e) {}
+
+      if (!state.user || !state.db || !state.fsModules) return;
+      try {
+        const { setDoc } = state.fsModules;
+        await setDoc(getProfileDocRef(profileId, 'ai_insights_and_notes'), extrasPayload, { merge: true });
+      } catch (e) {
+        console.warn(`Aviso ao salvar extras de ${profileId}:`, e.message);
+      }
+    }
+
+    async function saveCloudBackupSnapshot(profileId = getActiveProfileId()) {
+      if (!profileId) return null;
+      const pData = state.profiles[profileId];
+      const backupPayload = buildProfileBackupPayload(profileId);
+      pData.lastCloudBackup = backupPayload.exportDate;
+      await persistProfileExtrasToCloud(profileId);
+
+      if (state.user && state.db && state.fsModules) {
+        try {
+          const { setDoc } = state.fsModules;
+          await setDoc(getProfileDocRef(profileId, 'cloud_backup_json'), backupPayload);
+        } catch (e) {
+          console.warn(`Aviso ao salvar backup JSON de ${profileId}:`, e.message);
+        }
+      }
+      return backupPayload;
+    }
+
+    async function persistActiveWorkoutPlanToCloud() {
+      const pid = getActiveProfileId();
+      const plan = state.profiles[pid].workoutPlan;
+      try { localStorage.setItem(`HT_${pid}_PLAN_V3`, JSON.stringify(plan)); } catch (e) {}
+
+      if (!state.user || !state.db || !state.fsModules) return;
+      try {
+        const { setDoc } = state.fsModules;
+        await setDoc(getProfileDocRef(pid, 'active_plan_v3'), plan);
+        await saveCloudBackupSnapshot(pid);
+      } catch (e) {
+        console.warn("Erro ao salvar plano na nuvem:", e.message);
+      }
+    }
+
+    async function persistActiveWeightsToCloud() {
+      const pid = getActiveProfileId();
+      const weights = state.profiles[pid].exerciseWeights;
+      try { localStorage.setItem(`HT_${pid}_WEIGHTS`, JSON.stringify(weights)); } catch (e) {}
+
+      if (!state.user || !state.db || !state.fsModules) return;
+      try {
+        const { setDoc } = state.fsModules;
+        await setDoc(getProfileDocRef(pid, 'exercise_weights'), {
+          weights,
+          updatedAt: new Date().toISOString()
+        });
+        await saveCloudBackupSnapshot(pid);
+      } catch (e) {
+        console.warn("Erro ao salvar pesos na nuvem:", e.message);
+      }
+    }
+
+    function subscribeActiveProfileHistory() {
+      if (state.unsubscribeHistory) {
+        try { state.unsubscribeHistory(); } catch (e) {}
+        state.unsubscribeHistory = null;
+      }
+      if (!state.user || !state.db || !state.fsModules || !state.activeProfile) return;
+
+      const pid = state.activeProfile;
+      const { onSnapshot } = state.fsModules;
+      const colRef = getProfileHistoryColRef(pid);
+
+      state.unsubscribeHistory = onSnapshot(
+        colRef,
+        (snapshot) => {
+          const logs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+          logs.sort((a, b) => {
+            const ta = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt || 0).getTime();
+            const tb = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt || 0).getTime();
+            return tb - ta;
+          });
+          state.profiles[pid].historyLogs = logs;
+          try { localStorage.setItem(`HT_${pid}_HISTORY`, JSON.stringify(logs)); } catch (e) {}
+          updateGateStatsPreview();
+          if (state.activeProfile === pid && state.currentTab === 'History') {
+            render();
+          }
+        },
+        (error) => {
+          console.warn(`Erro no listener de histórico (${pid}):`, error.message);
+        }
+      );
+    }
+
+    async function syncAllProfilesFromCloud() {
+      if (!state.user || !state.db || !state.fsModules) return;
+      const { doc, getDoc, setDoc } = state.fsModules;
+
+      // 1. Chave API compartilhada do Google AI Studio
+      try {
+        const sharedRef = state.usePublicPath
+          ? doc(state.db, 'artifacts', state.appId, 'public', 'data', 'app_config', 'shared_app_settings')
+          : doc(state.db, 'artifacts', state.appId, 'users', state.user.uid, 'app_config', 'shared_app_settings');
+        const settingsSnap = await getDoc(sharedRef);
+        if (settingsSnap.exists() && settingsSnap.data().customApiKey) {
+          state.customApiKey = settingsSnap.data().customApiKey;
+          try { localStorage.setItem('HT_SHARED_GEMINI_KEY', state.customApiKey); } catch (e) {}
+        }
+      } catch (err) {
+        if (err.code === 'permission-denied' && state.usePublicPath) {
+          state.usePublicPath = false;
+          return syncAllProfilesFromCloud();
+        }
+      }
+
+      // 2. Sincronizar perfis de Roger e Gabriel
+      for (const pid of ['roger', 'gabriel']) {
+        try {
+          const planRef = getProfileDocRef(pid, 'active_plan_v3');
+          const planSnap = await getDoc(planRef);
+          if (planSnap.exists()) {
+            state.profiles[pid].workoutPlan = planSnap.data();
+            try { localStorage.setItem(`HT_${pid}_PLAN_V3`, JSON.stringify(planSnap.data())); } catch (e) {}
+          } else {
+            await setDoc(planRef, state.profiles[pid].workoutPlan);
+          }
+
+          const weightsRef = getProfileDocRef(pid, 'exercise_weights');
+          const weightsSnap = await getDoc(weightsRef);
+          if (weightsSnap.exists()) {
+            state.profiles[pid].exerciseWeights = weightsSnap.data().weights || {};
+            try { localStorage.setItem(`HT_${pid}_WEIGHTS`, JSON.stringify(state.profiles[pid].exerciseWeights)); } catch (e) {}
+          }
+
+          const extrasRef = getProfileDocRef(pid, 'ai_insights_and_notes');
+          const extrasSnap = await getDoc(extrasRef);
+          if (extrasSnap.exists()) {
+            const exData = extrasSnap.data();
+            if (exData.completedExercises) state.profiles[pid].completedExercises = exData.completedExercises;
+            if (exData.swappedExercises) state.profiles[pid].swappedExercises = exData.swappedExercises;
+            if (exData.aiReport) state.profiles[pid].aiReport = exData.aiReport;
+            if (Array.isArray(exData.chatMessages) && exData.chatMessages.length > 0) {
+              state.profiles[pid].chatMessages = exData.chatMessages;
+            }
+            if (exData.lastCloudBackup) state.profiles[pid].lastCloudBackup = exData.lastCloudBackup;
+            try { localStorage.setItem(`HT_${pid}_EXTRAS`, JSON.stringify(exData)); } catch (e) {}
+          }
+        } catch (err) {
+          console.warn(`Aviso ao sincronizar perfil ${pid}:`, err.message);
+        }
+      }
+
+      updateGateStatsPreview();
+      if (state.activeProfile) {
+        subscribeActiveProfileHistory();
+        render();
+      }
+    }
+
+    function updateConnectionBadge(isCloud) {
+      const badge = document.getElementById('connection-badge');
+      if (!badge) return;
+      if (isCloud) {
+        badge.className = 'inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-500/30';
+        badge.innerHTML = '<i data-lucide="cloud" class="w-2.5 h-2.5"></i> Nuvem';
+      } else {
+        badge.className = 'inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700';
+        badge.innerHTML = '<i data-lucide="wifi-off" class="w-2.5 h-2.5 text-yellow-400"></i> Local';
+      }
+      safeCreateIcons();
+    }
+
+    async function initCloudSync() {
+      try {
+        const [appMod, authMod, fsMod] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"),
+          import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js")
+        ]);
+
+        const app = appMod.initializeApp(firebaseConfig);
+        const auth = authMod.getAuth(app);
+        const db = fsMod.getFirestore(app);
+
+        state.db = db;
+        state.fsModules = fsMod;
+
+        authMod.onAuthStateChanged(auth, async (u) => {
+          state.user = u;
+          if (u) {
+            updateConnectionBadge(true);
+            await syncAllProfilesFromCloud();
+          } else {
+            updateConnectionBadge(false);
+          }
+        });
+
+        await authMod.signInAnonymously(auth);
+      } catch (e) {
+        console.warn("Modo offline ativo:", e.message);
+        updateConnectionBadge(false);
+      }
+    }
+
+    window.forceCloudSync = async function() {
+      if (!state.user || !state.db) {
+        showToast("Reconectando à nuvem...");
+        await initCloudSync();
+        return;
+      }
+      await syncAllProfilesFromCloud();
+      await saveCloudBackupSnapshot(getActiveProfileId());
+      render();
+      showToast("Todos os dados e estatísticas sincronizados!");
+    };
+
+    // --- INTEGRAÇÃO COM GOOGLE AI STUDIO (GEMINI API) ---
+    function getEffectiveApiKey() {
+      return (state.customApiKey || "").trim();
+    }
+
+    async function callGeminiWithBackoff(payload, retries = 3) {
+      const key = getEffectiveApiKey();
+      if (!key) throw new Error("API_KEY_MISSING");
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${encodeURIComponent(key)}`;
+
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) {
+            if (response.status === 429 && attempt < retries) {
+              await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+              continue;
+            }
+            throw new Error(`HTTP_${response.status}`);
+          }
+          return await response.json();
+        } catch (err) {
+          if (attempt === retries) throw err;
+          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+        }
+      }
+    }
+
+    // --- EXECUTOR ADMINISTRATIVO DA MIGS ---
+    async function executeMigsAdminAction(actionObj) {
+      if (!actionObj || !actionObj.action) return false;
+      const pData = getActiveData();
+      const plan = pData.workoutPlan;
+      let changed = false;
+
+      if (actionObj.action === 'UPDATE_FULL_PLAN' && actionObj.plan) {
+        const nextPlan = {
+          createdAt: new Date().toISOString(),
+          A: actionObj.plan.A || plan.A,
+          B: actionObj.plan.B || plan.B,
+          C: actionObj.plan.C || plan.C
+        };
+        pData.workoutPlan = nextPlan;
+        pData.completedExercises = {};
+        pData.swappedExercises = {};
+        pData.alternativeHistory = {};
+        changed = true;
+      } else if (actionObj.action === 'UPDATE_EXERCISE' && actionObj.workoutId && plan[actionObj.workoutId]) {
+        const list = plan[actionObj.workoutId].exercises;
+        const idx = list.findIndex(e =>
+          String(e.id) === String(actionObj.exerciseId) ||
+          (actionObj.exerciseName && e.name.toLowerCase().includes(actionObj.exerciseName.toLowerCase()))
+        );
+        if (idx !== -1 && actionObj.updates) {
+          list[idx] = { ...list[idx], ...actionObj.updates };
+          changed = true;
+        }
+      } else if (actionObj.action === 'ADD_EXERCISE' && actionObj.workoutId && plan[actionObj.workoutId] && actionObj.exercise) {
+        const newEx = {
+          id: Date.now(),
+          name: actionObj.exercise.name || "Novo Exercício",
+          sets: Number(actionObj.exercise.sets) || 3,
+          reps: actionObj.exercise.reps || "6-8",
+          focus: actionObj.exercise.focus || "Força e Definição",
+          rest: Number(actionObj.exercise.rest) || 75,
+          type: actionObj.exercise.type || "Livre/Máquina",
+          description: actionObj.exercise.description || "🎯 POSTURA: Coluna alinhada e abdômen firme.\n⏱️ TEMPO: 3s na descida, 1s na subida.\n✅ EXECUÇÃO: Controle total da carga."
+        };
+        plan[actionObj.workoutId].exercises.push(newEx);
+        changed = true;
+      } else if (actionObj.action === 'REMOVE_EXERCISE' && actionObj.workoutId && plan[actionObj.workoutId]) {
+        const before = plan[actionObj.workoutId].exercises.length;
+        plan[actionObj.workoutId].exercises = plan[actionObj.workoutId].exercises.filter(e =>
+          String(e.id) !== String(actionObj.exerciseId) &&
+          !(actionObj.exerciseName && e.name.toLowerCase().includes(actionObj.exerciseName.toLowerCase()))
+        );
+        if (plan[actionObj.workoutId].exercises.length !== before) changed = true;
+      } else if (actionObj.action === 'UPDATE_WEIGHT' && actionObj.weight !== undefined) {
+        let targetEx = null;
+        for (const key of ['A', 'B', 'C']) {
+          const found = plan[key]?.exercises.find(e =>
+            String(e.id) === String(actionObj.exerciseId) ||
+            (actionObj.exerciseName && e.name.toLowerCase().includes(actionObj.exerciseName.toLowerCase()))
+          );
+          if (found) { targetEx = found; break; }
+        }
+        if (targetEx) {
+          const wVal = parseFloat(actionObj.weight);
+          if (!isNaN(wVal) && wVal >= 0) {
+            const prev = pData.exerciseWeights[targetEx.id] || { history: [] };
+            pData.exerciseWeights[targetEx.id] = {
+              exerciseName: targetEx.name,
+              currentWeight: wVal,
+              updatedAt: new Date().toISOString(),
+              history: [{ weight: wVal, note: actionObj.note || 'Atualizado via Migs', date: new Date().toISOString() }, ...(prev.history || [])].slice(0, 30)
+            };
+            await persistActiveWeightsToCloud();
+            render();
+            return true;
+          }
+        }
+      }
+
+      if (changed) {
+        await persistActiveWorkoutPlanToCloud();
+        render();
+      }
+      return changed;
+    }
+
+    // --- GERAR RELATÓRIO INDIVIDUAL DE DESEMPENHO (ROGER OU GABRIEL) ---
+    window.generatePerformanceReport = async function() {
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+      pData.aiReportLoading = true;
+      render();
+
+      const freq = calculateFrequencyMetrics(pData.historyLogs);
+      const weightsSummary = Object.entries(pData.exerciseWeights).map(([id, data]) => {
+        const hist = (data.history || []).slice(0, 4).map(h => `${h.weight}kg (${formatShortDate(h.date)})`).join(' -> ');
+        return `• ${data.exerciseName}: atual ${data.currentWeight}kg | evolução: ${hist}`;
+      }).join('\n') || 'Nenhuma carga registrada ainda.';
+
+      const recentSessions = pData.historyLogs.slice(0, 8).map(l =>
+        `• Treino ${l.workoutId} em ${formatDate(l.createdAt)} (${l.completedItems?.length || 0}/${l.totalExercises} ex)`
+      ).join('\n') || 'Nenhum treino finalizado ainda.';
+
+      const prompt = `Você é a Migs (amiga personal trainer e administradora do app, debochada, direta e super técnica quando analisa dados).
+      Gere um RELATÓRIO INDIVIDUAL DE EVOLUÇÃO E FREQUÊNCIA exclusivamente para o usuário: **${userName}**.
+      Objetivo principal dele: menos repetições (6 a 8), foco em carga alta e perda de gordura/definição em treinos de até 1h.
+
+      DADOS REAIS DO ${userName.toUpperCase()}:
+      - Total de treinos registrados: ${freq.total}
+      - Treinos nos últimos 7 dias: ${freq.last7Days}
+      - Treinos nos últimos 30 dias: ${freq.last30Days}
+      - Intervalo médio entre treinos: ${freq.avgDaysBetween !== null ? freq.avgDaysBetween + ' dias' : 'poucos dados'}
+      - Distribuição por treino: A (${freq.distribution.A}x), B (${freq.distribution.B}x), C (${freq.distribution.C}x)
+      - Último treino: ${freq.lastWorkoutDate || 'Nenhum'}
+
+      CARGAS REGISTRADAS DO ${userName.toUpperCase()}:
+      ${weightsSummary}
+
+      ÚLTIMAS SESSÕES:
+      ${recentSessions}
+
+      INSTRUÇÕES DO RELATÓRIO:
+      1. Avalie a consistência e frequência semanal específica do **${userName}** (se ele está faltando muito ou indo bem).
+      2. Analise as cargas registradas e aponte onde dá pra subir peso (sobrecarga progressiva) ou onde algum grupamento ficou para trás.
+      3. Dê 2 ou 3 recomendações práticas para o próximo treino dele.
+      4. Use **negrito** para destaques e mantenha o tom divertido da Migs.`;
+
+      try {
+        const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] });
+        pData.aiReport = res.candidates?.[0]?.content?.parts?.[0]?.text || `Não consegui gerar o relatório de ${userName} agora.`;
+      } catch (e) {
+        if (e.message === "API_KEY_MISSING") {
+          pData.aiReport = "Cole sua chave gratuita do **Google AI Studio** na engrenagem ⚙️ no topo para liberar os relatórios individuais da Migs!";
+        } else {
+          pData.aiReport = "Erro ao conectar com o Google AI Studio. Verifique sua chave na engrenagem ⚙️ e tente novamente.";
+        }
+      }
+
+      pData.aiReportLoading = false;
+      render();
+      await saveCloudBackupSnapshot(getActiveProfileId());
+    };
+
+    // --- CONTROLE DE PESO / CARGA POR EXERCÍCIO ---
+    window.openWeightModal = function(id) {
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+      const workout = pData.workoutPlan[state.currentTab];
+      const ex = workout?.exercises.find(e => String(e.id) === String(id));
+      if (!ex) return;
+
+      state.selectedExerciseForWeight = ex;
+      const weightRecord = pData.exerciseWeights[ex.id];
+      const currentVal = weightRecord?.currentWeight ?? '';
+
+      document.getElementById('weight-modal-user-tag').innerHTML = `<i data-lucide="dumbbell" class="w-3.5 h-3.5"></i> Carga de ${escapeHtml(userName)}`;
+      document.getElementById('weight-modal-title').textContent = ex.name;
+
+      const lastEl = document.getElementById('weight-modal-last');
+      if (weightRecord && weightRecord.currentWeight !== undefined) {
+        const prevEntry = weightRecord.history?.[1];
+        let diffText = '';
+        if (prevEntry && prevEntry.weight !== undefined) {
+          const diff = weightRecord.currentWeight - prevEntry.weight;
+          if (diff > 0) diffText = ` • 📈 +${diff}kg desde o penúltimo`;
+          else if (diff < 0) diffText = ` • 📉 ${diff}kg desde o penúltimo`;
+        }
+        lastEl.textContent = `Último peso de ${userName}: ${weightRecord.currentWeight} kg (${formatDate(weightRecord.updatedAt)})${diffText}`;
+      } else {
+        lastEl.textContent = `Nenhuma carga registrada ainda para ${userName}.`;
+      }
+
+      const input = document.getElementById('weight-input');
+      input.value = currentVal;
+      document.getElementById('weight-note-input').value = '';
+
+      const historyBox = document.getElementById('weight-history-box');
+      const hist = weightRecord?.history || [];
+      if (hist.length > 0) {
+        historyBox.innerHTML = `
+          <p class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Histórico de ${escapeHtml(userName)}</p>
+          ${hist.slice(0, 5).map(item => `
+            <div class="flex items-center justify-between bg-slate-950/80 border border-slate-800/80 rounded-lg px-2.5 py-1.5 text-xs">
+              <div>
+                <span class="font-bold text-yellow-400">${item.weight} kg</span>
+                ${item.note ? `<span class="text-slate-400 ml-1.5">• ${escapeHtml(item.note)}</span>` : ''}
+              </div>
+              <span class="text-[10px] text-slate-500">${formatShortDate(item.date)}</span>
+            </div>
+          `).join('')}
+        `;
+      } else {
+        historyBox.innerHTML = '';
+      }
+
+      document.getElementById('weight-modal').classList.remove('hidden');
+      safeCreateIcons();
+      setTimeout(() => input.focus(), 60);
+    };
+
+    window.closeWeightModal = function() {
+      document.getElementById('weight-modal').classList.add('hidden');
+      state.selectedExerciseForWeight = null;
+    };
+
+    window.adjustWeightInput = function(delta) {
+      const input = document.getElementById('weight-input');
+      const cur = parseFloat(input.value) || 0;
+      const next = Math.max(0, Math.round((cur + delta) * 10) / 10);
+      input.value = next;
+    };
+
+    window.saveExerciseWeight = async function() {
+      const ex = state.selectedExerciseForWeight;
+      if (!ex) return;
+
+      const rawVal = parseFloat(document.getElementById('weight-input').value);
+      if (isNaN(rawVal) || rawVal < 0) {
+        showToast("Digite um peso válido em kg!");
+        return;
+      }
+
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+      const note = document.getElementById('weight-note-input').value.trim();
+      const prev = pData.exerciseWeights[ex.id] || { history: [] };
+      const nowIso = new Date().toISOString();
+
+      pData.exerciseWeights[ex.id] = {
+        exerciseName: ex.name,
+        currentWeight: rawVal,
+        updatedAt: nowIso,
+        history: [{ weight: rawVal, note, date: nowIso }, ...(prev.history || [])].slice(0, 30)
+      };
+
+      closeWeightModal();
+      render();
+      await persistActiveWeightsToCloud();
+      showToast(`Peso de ${userName} salvo: ${rawVal} kg!`);
+    };
+
+    // --- AÇÕES DE EXERCÍCIOS E TREINOS ---
+    window.switchTab = function(tab) {
+      state.currentTab = tab;
+      const pData = getActiveData();
+      pData.warmupPlan = null;
+      if (tab === 'Chat') pData.unreadChatCount = 0;
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = "tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center text-slate-400 hover:text-slate-200";
+      });
+      const activeBtn = document.getElementById(`tab-${tab}`);
+      if (activeBtn) {
+        activeBtn.className = "tab-btn flex-1 py-2.5 px-2 text-sm font-bold rounded-lg transition-all flex items-center justify-center bg-yellow-400 text-black shadow-md relative";
+      }
+
+      updateChatBadge();
+      render();
+    };
+
+    function updateChatBadge() {
+      const badge = document.getElementById('chat-unread-badge');
+      if (!badge) return;
+      const count = getActiveData().unreadChatCount || 0;
+      if (count > 0) {
+        badge.textContent = count > 9 ? '9+' : count;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
+    window.toggleExerciseComplete = function(id) {
+      const pData = getActiveData();
+      pData.completedExercises[id] = !pData.completedExercises[id];
+      render();
+      persistProfileExtrasToCloud();
+    };
+
+    window.toggleCardExpand = function(id) {
+      const pData = getActiveData();
+      pData.expandedCards[id] = !pData.expandedCards[id];
+      render();
+    };
+
+    window.setCardPanel = function(id, panel) {
+      const pData = getActiveData();
+      pData.cardActivePanel[id] = pData.cardActivePanel[id] === panel ? null : panel;
+      render();
+    };
+
+    window.handleNewAlternative = async function(id) {
+      const pData = getActiveData();
+      const workout = pData.workoutPlan[state.currentTab];
+      const ex = workout?.exercises.find(e => String(e.id) === String(id));
+      if (!ex) return;
+
+      pData.alternativeLoading[id] = true;
+      render();
+
+      const previous = pData.alternativeHistory[id] || [];
+      const avoidStr = previous.length > 0 ? `PROIBIDO sugerir novamente: ${previous.join(', ')}.` : '';
+      const prompt = `Você é a Migs (debochada, chame o usuário de ${getActiveMeta().name} ou mulher/gay). O usuário quer trocar o exercício '${ex.name}' (foco: ${ex.focus}). Sugira APENAS UM novo exercício similar para o mesmo grupo muscular, seguindo a estratégia atual de menos repetições (6-8 ou 8-10 reps), foco em carga e alto gasto calórico para perda de gordura. ${avoidStr} Explique 🎯 Postura, ⏱️ Tempo e ✅ Execução detalhadamente. Use **negrito** para destaques.`;
+
+      try {
+        const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] });
+        const text = res.candidates?.[0]?.content?.parts?.[0]?.text || "Faz um supino ou remada equivalente aí, mulher!";
+        pData.alternativeHistory[id] = [...previous, text];
+      } catch (e) {
+        if (e.message === "API_KEY_MISSING") {
+          showToast("Configure sua chave do Google AI Studio na engrenagem ⚙️!");
+        } else {
+          showToast("Erro ao consultar a Migs. Tente novamente.");
+        }
+      }
+
+      pData.alternativeLoading[id] = false;
+      render();
+    };
+
+    window.generateWarmup = async function() {
+      const pData = getActiveData();
+      const workout = pData.workoutPlan[state.currentTab];
+      if (!workout) return;
+
+      pData.warmupLoading = true;
+      render();
+
+      const names = workout.exercises.map(e => e.name).join(", ");
+      const prompt = `Você é a Migs falando com ${getActiveMeta().name}. Crie um aquecimento MUITO RÁPIDO (3 a 5 min) para o treino: ${workout.name}. Exercícios: ${names}. Use apenas peso do corpo ou halteres leves (2 a 3 movimentos). Seja debochada e apresse, pois o treino dura no máximo 1h. Destaque os nomes em **negrito**.`;
+
+      try {
+        const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] });
+        pData.warmupPlan = res.candidates?.[0]?.content?.parts?.[0]?.text || "Faz 5 minutos de mobilidade articular e 2 séries leves no primeiro aparelho!";
+      } catch (e) {
+        if (e.message === "API_KEY_MISSING") {
+          pData.warmupPlan = "Configure sua chave gratuita do **Google AI Studio** na engrenagem ⚙️ ali em cima para liberar o aquecimento da Migs! Enquanto isso, faça 2 séries bem leves no primeiro exercício.";
+        } else {
+          pData.warmupPlan = "Deu pane na rede, mas faz 2 séries de reconhecimento no primeiro exercício antes de socar carga!";
+        }
+      }
+
+      pData.warmupLoading = false;
+      render();
+    };
+
+    window.closeWarmup = function() {
+      getActiveData().warmupPlan = null;
+      render();
+    };
+
+    // Modal de Relatar Problema / Substituição
+    window.openReportModal = function(id) {
+      const pData = getActiveData();
+      const workout = pData.workoutPlan[state.currentTab];
+      const ex = workout?.exercises.find(e => String(e.id) === String(id));
+      if (!ex) return;
+
+      state.selectedExerciseForModal = ex;
+      document.getElementById('report-exercise-name').textContent = ex.name;
+      document.getElementById('report-textarea').value = pData.swappedExercises[ex.id]?.note || '';
+      document.getElementById('report-modal').classList.remove('hidden');
+      safeCreateIcons();
+    };
+
+    window.closeReportModal = function() {
+      document.getElementById('report-modal').classList.add('hidden');
+      state.selectedExerciseForModal = null;
+    };
+
+    window.handleSaveObservation = async function(withAiSwap) {
+      const ex = state.selectedExerciseForModal;
+      if (!ex) return;
+      const pData = getActiveData();
+      const note = document.getElementById('report-textarea').value.trim();
+
+      if (withAiSwap) {
+        const btn = document.getElementById('btn-swap-ai');
+        const originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Buscando substituto...`;
+        safeCreateIcons();
+
+        try {
+          const prompt = `Sugira 1 substituto imediato para '${ex.name}' (foco: ${ex.focus}) mantendo foco em carga alta (6-8 reps) e gasto calórico. Problema relatado por ${getActiveMeta().name}: '${note || 'aparelho indisponível'}'. Seja breve e direta.`;
+          const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] });
+          const suggestion = res.candidates?.[0]?.content?.parts?.[0]?.text || "Substitua por uma variação livre com halteres.";
+          pData.swappedExercises[ex.id] = { note, isSwapped: true, suggestion };
+          showToast("Substituto sugerido pela Migs!");
+        } catch (e) {
+          showToast(e.message === "API_KEY_MISSING" ? "Configure a chave do Google AI Studio na engrenagem ⚙️!" : "Erro ao buscar substituto.");
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      } else {
+        pData.swappedExercises[ex.id] = { note, isSwapped: false };
+        showToast("Nota salva!");
+      }
+
+      closeReportModal();
+      render();
+      await persistProfileExtrasToCloud();
+    };
+
+    // Finalizar Treino e Salvar no Histórico Individual
+    window.finishWorkout = async function() {
+      const pid = getActiveProfileId();
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+      const workoutId = state.currentTab;
+      const workout = pData.workoutPlan[workoutId];
+      if (!workout) return;
+
+      state.isSaving = true;
+      render();
+
+      const completedItems = Object.keys(pData.completedExercises)
+        .filter(id => pData.completedExercises[id])
+        .map(id => {
+          const found = workout.exercises.find(e => String(e.id) === String(id));
+          const wInfo = pData.exerciseWeights[id];
+          return {
+            id: Number(id),
+            name: found ? found.name : 'Exercício',
+            weight: wInfo && wInfo.currentWeight !== undefined ? wInfo.currentWeight : null
+          };
+        });
+
+      let achievement = `Treino ${workoutId} Concluído`;
+      if (getEffectiveApiKey()) {
+        try {
+          const prompt = `Você é a Migs. Crie um título irônico e engraçado (máx 4 palavras, sem aspas) para ${userName} que completou ${completedItems.length} exercícios de ${workout.name}.`;
+          const res = await callGeminiWithBackoff({ contents: [{ parts: [{ text: prompt }] }] }, 1);
+          const aiTitle = res.candidates?.[0]?.content?.parts?.[0]?.text?.replace(/['"]/g, '').trim();
+          if (aiTitle) achievement = aiTitle;
+        } catch (e) {}
+      }
+
+      const nowIso = new Date().toISOString();
+      const logPayload = {
+        user: userName,
+        workoutId,
+        workoutName: workout.name,
+        createdAt: nowIso,
+        completedItems,
+        totalExercises: workout.exercises.length,
+        achievement
+      };
+
+      const localEntry = { id: 'local-' + Date.now(), ...logPayload };
+      pData.historyLogs = [localEntry, ...pData.historyLogs];
+      try { localStorage.setItem(`HT_${pid}_HISTORY`, JSON.stringify(pData.historyLogs)); } catch (e) {}
+
+      if (state.user && state.db && state.fsModules) {
+        try {
+          const { addDoc, serverTimestamp } = state.fsModules;
+          await addDoc(getProfileHistoryColRef(pid), {
+            ...logPayload,
+            createdAt: serverTimestamp()
+          });
+        } catch (e) {
+          console.warn("Erro ao salvar sessão no Firestore:", e.message);
+        }
+      }
+
+      pData.completedExercises = {};
+      pData.swappedExercises = {};
+      pData.warmupPlan = null;
+      state.isSaving = false;
+
+      await saveCloudBackupSnapshot(pid);
+      showToast(`Treino ${workoutId} de ${userName} salvo na nuvem!`);
+      switchTab('History');
+    };
+
+    window.toggleHistoryExpand = function(logId) {
+      const pData = getActiveData();
+      pData.expandedHistory[logId] = !pData.expandedHistory[logId];
+      render();
+    };
+
+    window.handleExportBackup = async function() {
+      const pid = getActiveProfileId();
+      const userName = getActiveMeta().name;
+      const backupData = await saveCloudBackupSnapshot(pid);
+      render();
+
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Backup_Treino_${userName}_${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast(`Backup JSON de ${userName} salvo na nuvem e baixado!`);
+    };
+
+    // --- CHAT COM A MIGS (ADMINISTRADORA COMPLETA DO APP) ---
+    window.sendChatMessage = async function(customText) {
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+      const inputEl = document.getElementById('chat-input');
+      const text = (customText !== undefined ? customText : inputEl?.value || '').trim();
+      if (!text || state.isChatLoading) return;
+
+      if (inputEl && customText === undefined) inputEl.value = '';
+      pData.chatMessages.push({ role: 'user', text });
+      state.isChatLoading = true;
+      render();
+      scrollChatToBottom();
+
+      const freq = calculateFrequencyMetrics(pData.historyLogs);
+      const planSummary = ['A', 'B', 'C'].map(k => {
+        const w = pData.workoutPlan[k];
+        const exStr = w.exercises.map(e => {
+          const wRec = pData.exerciseWeights[e.id];
+          const wTag = wRec && wRec.currentWeight !== undefined ? ` [Carga: ${wRec.currentWeight}kg]` : '';
+          return `  (id:${e.id}) ${e.name} - ${e.sets}x${e.reps}${wTag}`;
+        }).join('\n');
+        return `Treino ${k} (${w.name}):\n${exStr}`;
+      }).join('\n\n');
+
+      const systemPrompt = `
+      VOCÊ É A MIGS: melhor amiga virtual e ADMINISTRADORA COMPLETA deste aplicativo de treino.
+      Usuário ativo agora: **${userName}**.
+      Personalidade: Irônica, divertida, fofoqueira estilo WhatsApp, usa gírias como "mulher", "amada", "babado", "diva", mas extremamente eficiente como administradora do app e treinadora focada em menos repetições (6-8 reps), carga alta e perda de gordura/definição em 1h máxima de treino.
+
+      ESTADO ATUAL DO ${userName.toUpperCase()} NO APP:
+      - Frequência: ${freq.total} treinos totais, ${freq.last7Days} nos últimos 7 dias, intervalo médio: ${freq.avgDaysBetween || 'N/A'} dias.
+      - Ficha Atual do ${userName}:
+      ${planSummary}
+
+      PODER ADMINISTRATIVO TOTAL NO APP:
+      Sempre que ${userName} pedir para alterar QUALQUER COISA no app (trocar exercício, mudar séries/repetições, adicionar/remover exercício, atualizar o peso/carga de um aparelho ou gerar uma ficha nova), VOCÊ DEVE EXECUTAR A ALTERAÇÃO IMEDIATAMENTE incluindo ao final da sua resposta um bloco [ADMIN_ACTION]...[/ADMIN_ACTION] com JSON válido em um dos formatos abaixo:
+
+      1) Alterar um exercício específico:
+      [ADMIN_ACTION]{"action":"UPDATE_EXERCISE","workoutId":"A","exerciseId":1,"exerciseName":"Supino Inclinado","updates":{"name":"Novo Nome","sets":4,"reps":"6-8","focus":"Peito","description":"🎯 POSTURA: ...\\n⏱️ TEMPO: ...\\n✅ EXECUÇÃO: ..."}}[/ADMIN_ACTION]
+
+      2) Adicionar novo exercício:
+      [ADMIN_ACTION]{"action":"ADD_EXERCISE","workoutId":"B","exercise":{"name":"Nome","sets":3,"reps":"6-8","focus":"Foco","description":"🎯 POSTURA: ...\\n⏱️ TEMPO: ...\\n✅ EXECUÇÃO: ..."}}[/ADMIN_ACTION]
+
+      3) Remover exercício:
+      [ADMIN_ACTION]{"action":"REMOVE_EXERCISE","workoutId":"C","exerciseId":17,"exerciseName":"Cadeira Extensora"}[/ADMIN_ACTION]
+
+      4) Registrar ou atualizar peso/carga de um exercício:
+      [ADMIN_ACTION]{"action":"UPDATE_WEIGHT","exerciseName":"Leg Press","weight":160,"note":"Ajustado pela Migs"}[/ADMIN_ACTION]
+
+      5) Substituir a ficha ABC inteira:
+      [ADMIN_ACTION]{"action":"UPDATE_FULL_PLAN","plan":{"A":{"name":"...","exercises":[...]},"B":{"name":"...","exercises":[...]},"C":{"name":"...","exercises":[...]}}}[/ADMIN_ACTION]
+
+      Se ele estiver apenas conversando, pedindo dicas ou perguntando notícias/fofocas (use Google Search quando necessário), responda naturalmente sem tag [ADMIN_ACTION].
+      `;
+
+      const recentHistory = pData.chatMessages.slice(-10).map(m => ({
+        role: m.role === 'user' ? 'user' : 'model',
+        parts: [{ text: m.text }]
+      }));
+
+      try {
+        const payload = {
+          contents: recentHistory,
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          tools: [{ google_search: {} }]
+        };
+        const res = await callGeminiWithBackoff(payload);
+        let text = res.candidates?.[0]?.content?.parts?.[0]?.text || "Tô passada, deu branco aqui amada.";
+        const grounding = res.candidates?.[0]?.groundingMetadata;
+        const rawSources = grounding?.groundingChunks || grounding?.groundingAttributions || [];
+        if (rawSources.length > 0) {
+          const links = rawSources
+            .filter(a => a.web?.uri && a.web?.title)
+            .map(a => `\n🔗 [${a.web.title}](${a.web.uri})`)
+            .join('');
+          if (links) text += "\n\n" + links;
+        }
+
+        if (text.includes('[ADMIN_ACTION]')) {
+          const match = text.match(/\[ADMIN_ACTION\]([\s\S]*?)\[\/ADMIN_ACTION\]/);
+          text = text.replace(/\[ADMIN_ACTION\][\s\S]*?\[\/ADMIN_ACTION\]/g, '').trim();
+          if (match && match[1]) {
+            try {
+              const actionObj = JSON.parse(match[1].trim());
+              const applied = await executeMigsAdminAction(actionObj);
+              if (applied) {
+                text += `\n\n✅ *Alteração aplicada e salva na nuvem para ${userName}!*`;
+                showToast(`Migs atualizou o app de ${userName}!`);
+              }
+            } catch (err) {
+              console.warn("Falha ao interpretar comando da Migs:", err);
+            }
+          }
+        }
+
+        pData.chatMessages.push({ role: 'model', text });
+      } catch (e) {
+        if (e.message === "API_KEY_MISSING") {
+          pData.chatMessages.push({
+            role: 'model',
+            text: "Mulher, falta colar sua chave gratuita do **Google AI Studio** na engrenagem ⚙️ ali em cima pra eu assumir o controle do app! 💅"
+          });
+        } else {
+          pData.chatMessages.push({
+            role: 'model',
+            text: "Deu pane na rede da gata, tenta mandar de novo amada! 💅"
+          });
+        }
+      }
+
+      state.isChatLoading = false;
+      if (state.currentTab !== 'Chat') {
+        pData.unreadChatCount = (pData.unreadChatCount || 0) + 1;
+        updateChatBadge();
+      }
+      render();
+      scrollChatToBottom();
+      await persistProfileExtrasToCloud();
+    };
+
+    function scrollChatToBottom() {
+      setTimeout(() => {
+        const box = document.getElementById('chat-messages-box');
+        if (box) box.scrollTop = box.scrollHeight;
+      }, 50);
+    }
+
+    window.startVoiceRecognition = function() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast("Reconhecimento de voz não suportado neste navegador.");
+        return;
+      }
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'pt-BR';
+        recognition.continuous = false;
+        recognition.onstart = () => { state.isRecordingVoice = true; render(); };
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          state.isRecordingVoice = false;
+          sendChatMessage(`[Áudio]: ${transcript}`);
+        };
+        recognition.onerror = () => {
+          state.isRecordingVoice = false;
+          render();
+          showToast("Não consegui captar o áudio.");
+        };
+        recognition.onend = () => { state.isRecordingVoice = false; render(); };
+        recognition.start();
+      } catch (e) {
+        state.isRecordingVoice = false;
+        render();
+      }
+    };
+
+    // --- CONFIGURAÇÕES (API KEY) ---
+    window.openSettingsModal = function() {
+      const input = document.getElementById('gemini-api-input');
+      if (input) input.value = state.customApiKey;
+      document.getElementById('settings-modal').classList.remove('hidden');
+      safeCreateIcons();
+    };
+
+    window.closeSettingsModal = function() {
+      document.getElementById('settings-modal').classList.add('hidden');
+    };
+
+    window.saveCustomApiKey = async function() {
+      const val = document.getElementById('gemini-api-input').value.trim();
+      state.customApiKey = val;
+      try { localStorage.setItem('HT_SHARED_GEMINI_KEY', val); } catch (e) {}
+      closeSettingsModal();
+
+      if (state.user && state.db && state.fsModules) {
+        try {
+          const { doc, setDoc } = state.fsModules;
+          const sharedRef = state.usePublicPath
+            ? doc(state.db, 'artifacts', state.appId, 'public', 'data', 'app_config', 'shared_app_settings')
+            : doc(state.db, 'artifacts', state.appId, 'users', state.user.uid, 'app_config', 'shared_app_settings');
+          await setDoc(sharedRef, { customApiKey: val, updatedAt: new Date().toISOString() }, { merge: true });
+        } catch (e) {
+          console.warn("Erro ao salvar chave na nuvem:", e.message);
+        }
+      }
+
+      showToast(val ? "Chave do Google AI Studio salva!" : "Chave removida.");
+    };
+
+    // --- RENDERIZAÇÃO DAS VIEWS ---
+    function renderWorkoutView(workoutId) {
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+      const workout = pData.workoutPlan[workoutId];
+      if (!workout) return '';
+
+      const warmupHtml = !pData.warmupPlan
+        ? `<button type="button" onclick="generateWarmup()" ${pData.warmupLoading ? 'disabled' : ''} class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 py-3 rounded-xl border border-slate-800 flex items-center justify-center gap-2 text-xs font-bold active:scale-95 transition-all mb-4">
+            ${pData.warmupLoading
+              ? `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-orange-400"></i> Gerando aquecimento de ${escapeHtml(userName)}...`
+              : `<i data-lucide="flame" class="w-4 h-4 text-orange-500"></i> Gerar Aquecimento Rápido (IA)`
+            }
+          </button>`
+        : `<div class="bg-orange-950/20 border border-orange-500/30 p-4 rounded-2xl mb-4 animate-fade-in relative">
+            <button type="button" onclick="closeWarmup()" class="absolute top-3 right-3 text-orange-400/60 hover:text-orange-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+            <h4 class="text-orange-400 font-bold text-xs uppercase mb-2 flex items-center gap-1.5"><i data-lucide="flame" class="w-3.5 h-3.5"></i> Aquecimento Rápido</h4>
+            <div class="text-xs text-orange-100 whitespace-pre-wrap leading-relaxed">${formatRichText(pData.warmupPlan)}</div>
+          </div>`;
+
+      const exercisesHtml = workout.exercises.map(ex => {
+        const isCompleted = !!pData.completedExercises[ex.id];
+        const isExpanded = !!pData.expandedCards[ex.id];
+        const activePanel = pData.cardActivePanel[ex.id];
+        const swapInfo = pData.swappedExercises[ex.id];
+        const weightInfo = pData.exerciseWeights[ex.id];
+        const hasWeight = weightInfo && weightInfo.currentWeight !== undefined;
+        const altList = pData.alternativeHistory[ex.id] || [];
+        const currentAlt = altList.length > 0 ? altList[altList.length - 1] : null;
+        const isAltLoading = !!pData.alternativeLoading[ex.id];
+
+        return `
+          <div>
+            ${swapInfo?.isSwapped ? `
+              <div class="mb-2 p-3 bg-yellow-900/20 border-l-2 border-yellow-400 rounded-r-xl text-xs text-yellow-100 animate-fade-in">
+                <div class="flex items-center gap-1.5 font-bold mb-1 text-yellow-400">
+                  <i data-lucide="zap" class="w-3.5 h-3.5"></i> Substituto Sugerido
+                </div>
+                <div class="whitespace-pre-wrap leading-relaxed">${formatRichText(swapInfo.suggestion)}</div>
+              </div>
+            ` : ''}
+
+            <div class="relative mb-3 rounded-2xl overflow-hidden transition-all duration-200 border ${isCompleted ? 'bg-slate-900/40 border-slate-800/70' : 'bg-slate-900 border-slate-800 hover:border-yellow-500/30'}">
+              <!-- Cabeçalho do Card -->
+              <div onclick="toggleCardExpand('${ex.id}')" class="p-4 flex items-center justify-between active:bg-slate-800/50 transition-colors cursor-pointer gap-3">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <button
+                    type="button"
+                    onclick="event.stopPropagation(); toggleExerciseComplete('${ex.id}')"
+                    aria-label="Marcar exercício"
+                    class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center border-2 transition-all ${isCompleted ? 'bg-yellow-400 border-yellow-400 text-black' : 'border-slate-600 text-slate-600 hover:border-yellow-400'}"
+                  >
+                    <i data-lucide="${isCompleted ? 'check' : 'circle'}" class="w-4 h-4 ${isCompleted ? 'stroke-[3]' : ''}"></i>
+                  </button>
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-sm sm:text-base leading-snug truncate ${isCompleted ? 'text-slate-500 line-through' : 'text-slate-100'}">
+                      ${escapeHtml(ex.name)}
+                    </h3>
+                    <div class="flex items-center flex-wrap gap-1.5 mt-1 text-xs text-slate-400">
+                      <span class="bg-slate-800 px-2 py-0.5 rounded text-yellow-400 font-mono font-bold">${escapeHtml(ex.sets)}x${escapeHtml(ex.reps)}</span>
+                      <span class="truncate">• ${escapeHtml(ex.focus)}</span>
+                      ${hasWeight
+                        ? `<span class="bg-emerald-950/90 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded font-bold">🏋️ ${weightInfo.currentWeight} kg</span>`
+                        : `<span class="bg-slate-800/80 text-slate-500 px-2 py-0.5 rounded">Sem carga</span>`
+                      }
+                    </div>
+                  </div>
+                </div>
+                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 flex-shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}"></i>
+              </div>
+
+              <!-- Área Expandida (Botão Peso no lugar do Descanso) -->
+              ${isExpanded ? `
+                <div class="bg-slate-950/40 px-4 pb-4 pt-1 border-t border-slate-800/60 animate-fade-in">
+                  <div class="grid grid-cols-2 gap-2.5 mt-3">
+                    <!-- BOTÃO PESO (SUBSTITUIU O BOTÃO DESCANSO) -->
+                    <button
+                      type="button"
+                      onclick="event.stopPropagation(); openWeightModal('${ex.id}')"
+                      class="flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black p-3 rounded-xl font-extrabold text-xs shadow-lg shadow-yellow-900/20 active:scale-95 transition-all"
+                    >
+                      <i data-lucide="dumbbell" class="w-4 h-4"></i>
+                      ${hasWeight ? `Peso (${weightInfo.currentWeight} kg)` : 'Registrar Peso'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onclick="event.stopPropagation(); setCardPanel('${ex.id}', 'execution')"
+                      class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 p-3 rounded-xl font-bold text-xs active:scale-95 transition-all"
+                    >
+                      <i data-lucide="play" class="w-4 h-4 text-yellow-400"></i>
+                      ${activePanel === 'execution' ? 'Ocultar Guia' : 'Como fazer'}
+                    </button>
+
+                    <button
+                      type="button"
+                      onclick="event.stopPropagation(); setCardPanel('${ex.id}', 'alternative')"
+                      class="col-span-2 flex items-center justify-center gap-2 bg-gradient-to-r from-slate-800 to-indigo-950/60 text-indigo-300 p-3 rounded-xl font-bold text-xs border border-indigo-500/30 hover:border-indigo-400/60 active:scale-95 transition-all"
+                    >
+                      <i data-lucide="shuffle" class="w-4 h-4"></i>
+                      ${activePanel === 'alternative' ? 'Ocultar Alternativo' : 'Mudar Exercício (IA)'}
+                    </button>
+                  </div>
+
+                  <div class="mt-2.5 flex items-center justify-between">
+                    ${swapInfo?.note ? `<span class="text-[11px] text-amber-400/90 truncate max-w-[60%]">📝 ${escapeHtml(swapInfo.note)}</span>` : '<span></span>'}
+                    <button
+                      type="button"
+                      onclick="event.stopPropagation(); openReportModal('${ex.id}')"
+                      class="text-xs text-slate-400 hover:text-yellow-400 flex items-center gap-1 py-1.5 px-2 transition-colors"
+                    >
+                      <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Relatar dor/problema
+                    </button>
+                  </div>
+
+                  ${activePanel === 'execution' ? `
+                    <div class="mt-2 bg-slate-800/90 rounded-xl p-4 border border-slate-700 animate-fade-in">
+                      <h4 class="text-xs font-bold text-yellow-400 uppercase mb-2 flex items-center gap-1.5">
+                        <i data-lucide="play" class="w-3.5 h-3.5"></i> Guia de Execução
+                      </h4>
+                      <div class="text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">${formatRichText(ex.description)}</div>
+                    </div>
+                  ` : ''}
+
+                  ${activePanel === 'alternative' ? `
+                    <div class="mt-2 bg-gradient-to-b from-indigo-950/50 to-slate-900 rounded-xl p-4 border border-indigo-500/30 animate-fade-in">
+                      <h4 class="text-xs font-bold text-indigo-400 uppercase mb-2 flex items-center gap-1.5">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Sugestão da Migs
+                      </h4>
+                      <div class="text-xs sm:text-sm text-indigo-50 leading-relaxed whitespace-pre-wrap mb-4">
+                        ${currentAlt ? formatRichText(currentAlt) : "Aparelho ocupado ou quer variar o estímulo? Toca no botão abaixo que a Migs escolhe um substituto pesado pra você."}
+                      </div>
+                      <button
+                        type="button"
+                        onclick="event.stopPropagation(); handleNewAlternative('${ex.id}')"
+                        ${isAltLoading ? 'disabled' : ''}
+                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-60"
+                      >
+                        ${isAltLoading
+                          ? `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Revirando a ficha...`
+                          : `<i data-lucide="shuffle" class="w-4 h-4"></i> Sugerir NOVO Alternativo`
+                        }
+                      </button>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="animate-fade-in">
+          <div class="flex items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2 text-slate-200 min-w-0">
+              <i data-lucide="dumbbell" class="w-4 h-4 text-yellow-400 flex-shrink-0"></i>
+              <h2 class="text-xs font-extrabold uppercase tracking-wider truncate">${escapeHtml(workout.name)}</h2>
+            </div>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-900 border border-slate-800 text-slate-300 flex-shrink-0">
+              ${escapeHtml(userName)}
+            </span>
+          </div>
+
+          ${warmupHtml}
+          <div class="space-y-1 mb-6">${exercisesHtml}</div>
+
+          <div class="pb-6">
+            <button
+              type="button"
+              onclick="finishWorkout()"
+              ${state.isSaving ? 'disabled' : ''}
+              class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold py-4 rounded-2xl shadow-lg shadow-emerald-950/50 active:scale-95 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+            >
+              ${state.isSaving
+                ? `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Salvando treino de ${escapeHtml(userName)}...`
+                : `<i data-lucide="save" class="w-5 h-5"></i> Finalizar Treino de ${escapeHtml(userName)}`
+              }
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderHistoryView() {
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+      const freq = calculateFrequencyMetrics(pData.historyLogs);
+
+      const allExercises = [
+        ...(pData.workoutPlan.A?.exercises || []),
+        ...(pData.workoutPlan.B?.exercises || []),
+        ...(pData.workoutPlan.C?.exercises || [])
+      ];
+
+      const trackedWeightsCount = Object.keys(pData.exerciseWeights || {}).length;
+
+      const weightCardsHtml = allExercises
+        .filter(ex => pData.exerciseWeights[ex.id]?.currentWeight !== undefined)
+        .map(ex => {
+          const w = pData.exerciseWeights[ex.id];
+          const prev = w.history?.[1];
+          let deltaBadge = '';
+          if (prev && prev.weight !== undefined) {
+            const diff = w.currentWeight - prev.weight;
+            if (diff > 0) deltaBadge = `<span class="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded">+${diff}kg</span>`;
+            else if (diff < 0) deltaBadge = `<span class="text-[10px] font-bold text-red-400 bg-red-950 px-1.5 py-0.5 rounded">${diff}kg</span>`;
+          }
+          return `
+            <div class="flex items-center justify-between bg-slate-950/70 border border-slate-800/80 rounded-xl px-3 py-2.5 text-xs">
+              <div class="min-w-0 pr-2">
+                <p class="font-bold text-slate-200 truncate">${escapeHtml(ex.name)}</p>
+                <p class="text-[10px] text-slate-500">Atualizado em ${formatDate(w.updatedAt)}</p>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                ${deltaBadge}
+                <span class="font-black text-sm text-yellow-400">${w.currentWeight} kg</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      const logsHtml = pData.historyLogs.length === 0
+        ? `<div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-500">Nenhum treino finalizado por ${escapeHtml(userName)} ainda.</div>`
+        : pData.historyLogs.map(log => {
+            const isExp = !!pData.expandedHistory[log.id];
+            const items = log.completedItems || [];
+            const rate = log.totalExercises > 0 ? Math.round((items.length / log.totalExercises) * 100) : 0;
+
+            return `
+              <div class="bg-slate-900 rounded-2xl border border-slate-800 mb-2.5 overflow-hidden">
+                <div onclick="toggleHistoryExpand('${log.id}')" class="p-4 flex items-center justify-between cursor-pointer active:bg-slate-800/50">
+                  <div>
+                    <div class="flex items-center flex-wrap gap-2 mb-1">
+                      <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                        <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-yellow-400"></i>
+                        ${formatDate(log.createdAt)}
+                      </span>
+                      ${log.achievement ? `
+                        <span class="text-[10px] bg-yellow-500/15 text-yellow-400 px-2 py-0.5 rounded border border-yellow-500/30 font-bold flex items-center gap-1">
+                          <i data-lucide="trophy" class="w-3 h-3"></i> ${escapeHtml(log.achievement)}
+                        </span>
+                      ` : ''}
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-400">
+                      <span class="bg-slate-800 px-2 py-0.5 rounded border border-slate-700 font-bold text-slate-200">Treino ${escapeHtml(log.workoutId)}</span>
+                      <span class="${rate === 100 ? 'text-emerald-400 font-semibold' : 'text-yellow-400'}">${rate}% Concluído</span>
+                    </div>
+                  </div>
+                  <i data-lucide="chevron-down" class="w-4 h-4 text-slate-500 transition-transform ${isExp ? 'rotate-180' : ''}"></i>
+                </div>
+                ${isExp ? `
+                  <div class="px-4 pb-4 pt-2 bg-slate-950/40 border-t border-slate-800/60">
+                    <p class="text-[10px] font-bold text-slate-500 uppercase mb-2">Exercícios Concluídos</p>
+                    ${items.length > 0
+                      ? `<ul class="space-y-1.5">${items.map(i => `
+                          <li class="text-xs text-slate-300 flex items-center justify-between gap-2">
+                            <span class="flex items-center gap-2 truncate"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500 flex-shrink-0"></i> ${escapeHtml(i.name)}</span>
+                            ${i.weight !== null && i.weight !== undefined ? `<span class="text-[11px] font-bold text-yellow-400 flex-shrink-0">${i.weight} kg</span>` : ''}
+                          </li>`).join('')}</ul>`
+                      : `<p class="text-xs text-slate-600 italic">Nenhum exercício marcado.</p>`
+                    }
+                  </div>
+                ` : ''}
+              </div>
+            `;
+          }).join('');
+
+      return `
+        <div class="animate-fade-in space-y-5">
+          <!-- Cabeçalho + Backup Nuvem & JSON -->
+          <div class="flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 text-slate-200">
+                <i data-lucide="bar-chart-2" class="w-4 h-4 text-yellow-400"></i>
+                <h2 class="text-xs font-extrabold uppercase tracking-wider truncate">Relatórios • ${escapeHtml(userName)}</h2>
+              </div>
+              <p class="text-[10px] text-emerald-400 mt-0.5 flex items-center gap-1">
+                <i data-lucide="cloud" class="w-3 h-3"></i>
+                ${pData.lastCloudBackup ? `Nuvem atualizada: ${formatDate(pData.lastCloudBackup)}` : 'Sincronização automática ativa'}
+              </p>
+            </div>
+            <div class="flex items-center gap-1.5 flex-shrink-0">
+              <button type="button" onclick="forceCloudSync()" title="Sincronizar com a nuvem" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 p-2 rounded-xl border border-slate-700 transition-all active:scale-95">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-emerald-400"></i>
+              </button>
+              <button type="button" onclick="handleExportBackup()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-2 rounded-xl border border-slate-700 flex items-center gap-1.5 font-semibold transition-all active:scale-95">
+                <i data-lucide="download" class="w-3.5 h-3.5 text-yellow-400"></i> JSON
+              </button>
+            </div>
+          </div>
+
+          <!-- Cards de Frequência e Carga Individual -->
+          <div class="grid grid-cols-3 gap-2.5">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Treinos</p>
+              <p class="text-xl font-black text-white mt-0.5">${freq.total}</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">${freq.last7Days} nos últ. 7d</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Frequência</p>
+              <p class="text-xl font-black text-emerald-400 mt-0.5">${freq.avgDaysBetween !== null ? `${freq.avgDaysBetween}d` : '-'}</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">intervalo médio</p>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Cargas</p>
+              <p class="text-xl font-black text-yellow-400 mt-0.5">${trackedWeightsCount}/${allExercises.length}</p>
+              <p class="text-[10px] text-slate-500 mt-0.5">mapeadas</p>
+            </div>
+          </div>
+
+          <!-- Botão & Painel de Relatório Individual (Google AI Studio) -->
+          <div class="bg-gradient-to-b from-indigo-950/30 to-slate-900 border border-indigo-500/30 rounded-2xl p-4">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-4 h-4 text-yellow-400"></i> Relatório Individual (${escapeHtml(userName)})
+              </h3>
+            </div>
+            <p class="text-xs text-slate-400 mb-3 leading-relaxed">
+              Cruza a frequência de treinos e as cargas específicas de <strong>${escapeHtml(userName)}</strong> para sugerir progressão de peso e ajustes.
+            </p>
+            <button 
+              type="button"
+              onclick="generatePerformanceReport()" 
+              ${pData.aiReportLoading ? 'disabled' : ''}
+              class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-60"
+            >
+              ${pData.aiReportLoading 
+                ? `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Analisando dados de ${escapeHtml(userName)}...`
+                : `<i data-lucide="sparkles" class="w-4 h-4"></i> Gerar Relatório de ${escapeHtml(userName)}`
+              }
+            </button>
+
+            ${pData.aiReport ? `
+              <div class="mt-4 pt-3 border-t border-indigo-500/20 text-xs text-slate-200 leading-relaxed whitespace-pre-wrap animate-fade-in">
+                ${formatRichText(pData.aiReport)}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Mapa de Cargas Atuais do Usuário -->
+          ${weightCardsHtml ? `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+              <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-300 mb-3 flex items-center gap-1.5">
+                <i data-lucide="trending-up" class="w-4 h-4 text-emerald-400"></i> Cargas Atuais de ${escapeHtml(userName)}
+              </h3>
+              <div class="space-y-2">${weightCardsHtml}</div>
+            </div>
+          ` : ''}
+
+          <!-- Histórico de Sessões -->
+          <div>
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">Sessões de ${escapeHtml(userName)}</h3>
+            ${logsHtml}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderChatView() {
+      const pData = getActiveData();
+      const userName = getActiveMeta().name;
+
+      const msgsHtml = pData.chatMessages.map(msg => `
+        <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[85%] rounded-2xl p-3.5 text-sm whitespace-pre-wrap leading-relaxed shadow ${
+            msg.role === 'user'
+              ? 'bg-yellow-400 text-black font-medium rounded-tr-none'
+              : 'bg-slate-800 text-slate-100 rounded-tl-none border border-slate-700/70'
+          }">${msg.role === 'user' ? escapeHtml(msg.text) : formatRichText(msg.text)}</div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="flex flex-col h-[calc(100vh-145px)] bg-slate-900/50 rounded-2xl border border-slate-800 overflow-hidden animate-fade-in">
+          <!-- Barra Topo do Chat -->
+          <div class="px-4 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-yellow-400">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-100 leading-none">Migs 💅 • Perfil ${escapeHtml(userName)}</h3>
+                <span class="text-[11px] text-emerald-400 font-medium">Admin & Personal Individual</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensagens -->
+          <div id="chat-messages-box" class="flex-1 overflow-y-auto p-4 space-y-3.5">
+            ${msgsHtml}
+            ${state.isChatLoading ? `
+              <div class="flex justify-start">
+                <div class="bg-slate-800 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2 text-slate-400 text-xs font-medium">
+                  <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-yellow-400"></i> Migs tá digitando...
+                </div>
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Sugestões Rápidas -->
+          <div class="px-3 pt-2 bg-slate-900/80 border-t border-slate-800/60">
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+              ${['Analisa minha frequência', 'Dica pra secar rápido', 'Fofoca dos famosos'].map(tag => `
+                <button type="button" onclick="sendChatMessage('${tag}')" class="whitespace-nowrap bg-slate-800 text-xs text-slate-300 px-3 py-1.5 rounded-full border border-slate-700 hover:border-yellow-400 hover:text-yellow-400 transition-colors">
+                  ${tag}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Input e Microfone -->
+          <div class="p-3 bg-slate-900 flex items-center gap-2">
+            <input 
+              type="text" 
+              id="chat-input" 
+              onkeydown="if(event.key==='Enter') sendChatMessage()"
+              placeholder="${state.isRecordingVoice ? 'Ouvindo seu áudio...' : `Fala com a Migs, ${escapeHtml(userName)}...`}" 
+              ${state.isRecordingVoice ? 'disabled' : ''}
+              class="flex-1 bg-slate-950 text-white text-sm rounded-xl px-3.5 py-3 outline-none focus:ring-1 focus:ring-yellow-400 border border-slate-800 placeholder:text-slate-600 disabled:opacity-50"
+            />
+            <button 
+              type="button"
+              onclick="startVoiceRecognition()" 
+              aria-label="Gravar áudio"
+              class="p-3 rounded-xl transition-all ${state.isRecordingVoice ? 'bg-red-500 text-white animate-pulse' : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700'}"
+            >
+              <i data-lucide="mic" class="w-5 h-5"></i>
+            </button>
+            <button 
+              type="button"
+              onclick="sendChatMessage()" 
+              aria-label="Enviar mensagem"
+              class="bg-yellow-400 hover:bg-yellow-300 text-black p-3 rounded-xl active:scale-95 transition-transform"
+            >
+              <i data-lucide="send" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function render() {
+      const main = document.getElementById('main-content');
+      if (!main) return;
+
+      if (['A', 'B', 'C'].includes(state.currentTab)) {
+        main.innerHTML = renderWorkoutView(state.currentTab);
+      } else if (state.currentTab === 'History') {
+        main.innerHTML = renderHistoryView();
+      } else if (state.currentTab === 'Chat') {
+        main.innerHTML = renderChatView();
+      }
+
+      safeCreateIcons();
+    }
+
+    // Inicialização Imediata da Interface + Sincronização Assíncrona em Segundo Plano
+    updateGateStatsPreview();
+    render();
+    initCloudSync();
+  </script>
+</body>
+</html>
